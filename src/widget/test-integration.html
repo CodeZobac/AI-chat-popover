@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETIC AI Widget Integration Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .test-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-card h3 {
+            margin-bottom: 1rem;
+            color: #f0f0f0;
+        }
+        
+        .test-card p {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status-panel {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            max-width: 300px;
+            z-index: 1000;
+        }
+        
+        .status-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+        }
+        
+        .log-panel {
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 2rem;
+        }
+        
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        .info { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Widget Integration Test Suite</h1>
+            <p>Test all aspects of the ETIC AI Widget integration API</p>
+        </div>
+        
+        <div class="status-panel" id="statusPanel">
+            <div class="status-item"><strong>Widget Status:</strong> <span id="widgetStatus">Not Loaded</span></div>
+            <div class="status-item"><strong>Mode:</strong> <span id="widgetMode">-</span></div>
+            <div class="status-item"><strong>Version:</strong> <span id="widgetVersion">-</span></div>
+            <div class="status-item"><strong>Retries:</strong> <span id="widgetRetries">0</span></div>
+            <div class="status-item"><strong>Origin:</strong> <span id="currentOrigin">-</span></div>
+        </div>
+        
+        <div class="test-grid">
+            <!-- Basic Integration Test -->
+            <div class="test-card">
+                <h3>🚀 Basic Integration</h3>
+                <p>Test basic widget initialization and destruction.</p>
+                <div class="button-group">
+                    <button onclick="testBasicInit()">Initialize Widget</button>
+                    <button onclick="testDestroy()">Destroy Widget</button>
+                    <button onclick="testReinit()">Reinitialize</button>
+                </div>
+            </div>
+            
+            <!-- Configuration Tests -->
+            <div class="test-card">
+                <h3>⚙️ Configuration</h3>
+                <p>Test different configuration options and updates.</p>
+                <div class="button-group">
+                    <button onclick="testLightTheme()">Light Theme</button>
+                    <button onclick="testDarkTheme()">Dark Theme</button>
+                    <button onclick="testPosition()">Toggle Position</button>
+                    <button onclick="testColors()">Custom Colors</button>
+                </div>
+            </div>
+            
+            <!-- Widget Control -->
+            <div class="test-card">
+                <h3>🎮 Widget Control</h3>
+                <p>Test programmatic widget control methods.</p>
+                <div class="button-group">
+                    <button onclick="testOpen()">Open Widget</button>
+                    <button onclick="testClose()">Close Widget</button>
+                    <button onclick="testToggle()">Toggle Widget</button>
+                </div>
+            </div>
+            
+            <!-- Security Tests -->
+            <div class="test-card">
+                <h3>🔒 Security</h3>
+                <p>Test origin validation and security features.</p>
+                <div class="button-group">
+                    <button onclick="testOriginValidation()">Test Origins</button>
+                    <button onclick="testConfigValidation()">Config Validation</button>
+                    <button onclick="testSecureMode()">Secure Mode</button>
+                </div>
+            </div>
+            
+            <!-- Fallback Tests -->
+            <div class="test-card">
+                <h3>🛡️ Fallback & Compatibility</h3>
+                <p>Test iframe fallback and compatibility features.</p>
+                <div class="button-group">
+                    <button onclick="testIframeFallback()">Force Iframe Mode</button>
+                    <button onclick="testBrowserSupport()">Check Support</button>
+                    <button onclick="testErrorHandling()">Error Handling</button>
+                </div>
+            </div>
+            
+            <!-- API Tests -->
+            <div class="test-card">
+                <h3>🔌 API Integration</h3>
+                <p>Test API methods and event handling.</p>
+                <div class="button-group">
+                    <button onclick="testGetConfig()">Get Config</button>
+                    <button onclick="testGetStatus()">Get Status</button>
+                    <button onclick="testEventHandling()">Test Events</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-card">
+            <h3>📋 Integration Code Examples</h3>
+            <p>Copy these examples to test integration on your own site:</p>
+            
+            <h4>Basic Integration:</h4>
+            <div class="code-block" id="basicCode">
+&lt;script&gt;
+  window.EticAI = {
+    config: {
+      theme: 'light',
+      position: 'bottom-right',
+      primaryColor: '#2563eb',
+      allowedOrigins: ['*'], // Use specific domains in production
+      debug: true
+    }
+  };
+&lt;/script&gt;
+&lt;script src="https://etic-ai.vercel.app/widget/loader.js" async&gt;&lt;/script&gt;
+            </div>
+            
+            <h4>Advanced Configuration:</h4>
+            <div class="code-block" id="advancedCode">
+&lt;script&gt;
+  window.EticAI = {
+    config: {
+      theme: 'dark',
+      position: 'bottom-left',
+      primaryColor: '#10b981',
+      secondaryColor: '#374151',
+      branding: {
+        name: 'Your AI Assistant',
+        showPoweredBy: false
+      },
+      allowedOrigins: ['https://yourdomain.com'],
+      fallbackToIframe: true,
+      debug: true
+    }
+  };
+&lt;/script&gt;
+&lt;script src="https://etic-ai.vercel.app/widget/loader.js" async&gt;&lt;/script&gt;
+            </div>
+        </div>
+        
+        <div class="log-panel" id="logPanel">
+            <div>🔍 Test Log - Ready for testing...</div>
+        </div>
+    </div>
+
+    <script>
+        // Test configuration
+        let currentTheme = 'light';
+        let currentPosition = 'bottom-right';
+        let testEventListener = null;
+        
+        // Logging
+        function log(message, type = 'info') {
+            const logPanel = document.getElementById('logPanel');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // Update status panel
+        function updateStatus() {
+            const status = window.EticAI ? window.EticAI.getStatus() : null;
+            const config = window.EticAI ? window.EticAI.getConfig() : null;
+            
+            document.getElementById('widgetStatus').textContent = status ? (status.loaded ? 'Loaded' : 'Not Loaded') : 'Not Available';
+            document.getElementById('widgetMode').textContent = status ? status.mode : '-';
+            document.getElementById('widgetVersion').textContent = status ? status.version : '-';
+            document.getElementById('widgetRetries').textContent = status ? status.retryCount : '0';
+            document.getElementById('currentOrigin').textContent = window.location.origin;
+        }
+        
+        // Test Functions
+        function testBasicInit() {
+            log('Testing basic widget initialization...', 'info');
+            
+            window.EticAI = window.EticAI || {};
+            window.EticAI.config = {
+                theme: 'light',
+                position: 'bottom-right',
+                primaryColor: '#2563eb',
+                allowedOrigins: ['*'],
+                debug: true,
+                fallbackToIframe: true
+            };
+            
+            // Load the widget
+            const script = document.createElement('script');
+            script.src = './loader.js'; // Local loader for testing
+            script.async = true;
+            script.onload = () => {
+                log('Widget loader script loaded successfully', 'success');
+                updateStatus();
+            };
+            script.onerror = () => {
+                log('Failed to load widget loader script', 'error');
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        function testDestroy() {
+            if (window.EticAI && window.EticAI.destroy) {
+                log('Destroying widget...', 'info');
+                window.EticAI.destroy();
+                updateStatus();
+                log('Widget destroyed', 'success');
+            } else {
+                log('Widget not available for destruction', 'warning');
+            }
+        }
+        
+        function testReinit() {
+            if (window.EticAI && window.EticAI.init) {
+                log('Reinitializing widget...', 'info');
+                window.EticAI.init({
+                    theme: currentTheme,
+                    position: currentPosition,
+                    primaryColor: '#2563eb',
+                    debug: true
+                });
+                updateStatus();
+                log('Widget reinitialized', 'success');
+            } else {
+                log('Widget not available for reinitialization', 'warning');
+            }
+        }
+        
+        function testLightTheme() {
+            if (window.EticAI && window.EticAI.updateConfig) {
+                currentTheme = 'light';
+                log('Switching to light theme...', 'info');
+                window.EticAI.updateConfig({ theme: 'light' });
+                log('Theme updated to light', 'success');
+            } else {
+                log('Widget not available for theme update', 'warning');
+            }
+        }
+        
+        function testDarkTheme() {
+            if (window.EticAI && window.EticAI.updateConfig) {
+                currentTheme = 'dark';
+                log('Switching to dark theme...', 'info');
+                window.EticAI.updateConfig({ theme: 'dark' });
+                log('Theme updated to dark', 'success');
+            } else {
+                log('Widget not available for theme update', 'warning');
+            }
+        }
+        
+        function testPosition() {
+            if (window.EticAI && window.EticAI.updateConfig) {
+                currentPosition = currentPosition === 'bottom-right' ? 'bottom-left' : 'bottom-right';
+                log(`Switching position to ${currentPosition}...`, 'info');
+                window.EticAI.updateConfig({ position: currentPosition });
+                log(`Position updated to ${currentPosition}`, 'success');
+            } else {
+                log('Widget not available for position update', 'warning');
+            }
+        }
+        
+        function testColors() {
+            if (window.EticAI && window.EticAI.updateConfig) {
+                const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                log(`Updating primary color to ${randomColor}...`, 'info');
+                window.EticAI.updateConfig({ primaryColor: randomColor });
+                log(`Primary color updated to ${randomColor}`, 'success');
+            } else {
+                log('Widget not available for color update', 'warning');
+            }
+        }
+        
+        function testOpen() {
+            if (window.EticAI && window.EticAI.open) {
+                log('Opening widget...', 'info');
+                window.EticAI.open();
+                log('Widget open command sent', 'success');
+            } else {
+                log('Widget not available for opening', 'warning');
+            }
+        }
+        
+        function testClose() {
+            if (window.EticAI && window.EticAI.close) {
+                log('Closing widget...', 'info');
+                window.EticAI.close();
+                log('Widget close command sent', 'success');
+            } else {
+                log('Widget not available for closing', 'warning');
+            }
+        }
+        
+        function testToggle() {
+            if (window.EticAI && window.EticAI.toggle) {
+                log('Toggling widget...', 'info');
+                window.EticAI.toggle();
+                log('Widget toggle command sent', 'success');
+            } else {
+                log('Widget not available for toggling', 'warning');
+            }
+        }
+        
+        function testOriginValidation() {
+            log('Testing origin validation...', 'info');
+            
+            // Test with restricted origins
+            if (window.EticAI && window.EticAI.updateConfig) {
+                window.EticAI.updateConfig({
+                    allowedOrigins: ['https://example.com', 'https://test.com']
+                });
+                log('Updated allowed origins to restricted list', 'info');
+                log(`Current origin: ${window.location.origin}`, 'info');
+                log('Widget should still work as it was already initialized', 'warning');
+            } else {
+                log('Widget not available for origin testing', 'warning');
+            }
+        }
+        
+        function testConfigValidation() {
+            log('Testing configuration validation...', 'info');
+            
+            // Test invalid configuration
+            try {
+                if (window.EticAI && window.EticAI.updateConfig) {
+                    window.EticAI.updateConfig({
+                        theme: 'invalid-theme',
+                        position: 'invalid-position',
+                        primaryColor: 'invalid-color'
+                    });
+                    log('Invalid config update attempted', 'warning');
+                }
+            } catch (error) {
+                log(`Config validation error: ${error.message}`, 'error');
+            }
+        }
+        
+        function testSecureMode() {
+            log('Testing secure mode configuration...', 'info');
+            
+            if (window.EticAI && window.EticAI.updateConfig) {
+                window.EticAI.updateConfig({
+                    allowedOrigins: [window.location.origin],
+                    debug: false,
+                    apiKey: 'test-api-key'
+                });
+                log('Secure mode configuration applied', 'success');
+            } else {
+                log('Widget not available for secure mode test', 'warning');
+            }
+        }
+        
+        function testIframeFallback() {
+            log('Testing iframe fallback mode...', 'info');
+            
+            // Destroy current widget and reinit with iframe fallback
+            if (window.EticAI) {
+                window.EticAI.destroy();
+                
+                // Simulate script loading failure by using invalid URL
+                window.EticAI.config = {
+                    ...window.EticAI.config,
+                    widgetUrl: 'https://invalid-url-for-testing.com',
+                    fallbackToIframe: true,
+                    debug: true
+                };
+                
+                window.EticAI.init(window.EticAI.config).catch(error => {
+                    log(`Iframe fallback test: ${error.message}`, 'warning');
+                });
+            }
+        }
+        
+        function testBrowserSupport() {
+            if (window.EticAI && window.EticAI.isSupported) {
+                const supported = window.EticAI.isSupported();
+                log(`Browser support check: ${supported ? 'Supported' : 'Not Supported'}`, supported ? 'success' : 'error');
+                
+                // Log specific feature support
+                log(`PostMessage: ${!!window.postMessage}`, 'info');
+                log(`AddEventListener: ${!!window.addEventListener}`, 'info');
+                log(`CreateElement: ${!!document.createElement}`, 'info');
+            } else {
+                log('Widget not available for browser support check', 'warning');
+            }
+        }
+        
+        function testErrorHandling() {
+            log('Testing error handling...', 'info');
+            
+            // Test various error scenarios
+            try {
+                if (window.EticAI) {
+                    // Test with invalid config
+                    window.EticAI.updateConfig(null);
+                }
+            } catch (error) {
+                log(`Error handling test 1: ${error.message}`, 'info');
+            }
+            
+            try {
+                if (window.EticAI) {
+                    // Test method on destroyed widget
+                    window.EticAI.destroy();
+                    window.EticAI.open();
+                }
+            } catch (error) {
+                log(`Error handling test 2: ${error.message}`, 'info');
+            }
+        }
+        
+        function testGetConfig() {
+            if (window.EticAI && window.EticAI.getConfig) {
+                const config = window.EticAI.getConfig();
+                log('Current configuration retrieved:', 'info');
+                log(JSON.stringify(config, null, 2), 'info');
+            } else {
+                log('Widget not available for config retrieval', 'warning');
+            }
+        }
+        
+        function testGetStatus() {
+            if (window.EticAI && window.EticAI.getStatus) {
+                const status = window.EticAI.getStatus();
+                log('Current status retrieved:', 'info');
+                log(JSON.stringify(status, null, 2), 'info');
+                updateStatus();
+            } else {
+                log('Widget not available for status retrieval', 'warning');
+            }
+        }
+        
+        function testEventHandling() {
+            log('Testing event handling...', 'info');
+            
+            // Remove existing listener
+            if (testEventListener) {
+                window.removeEventListener('etic-ai-widget-message', testEventListener);
+            }
+            
+            // Add new listener
+            testEventListener = function(event) {
+                log(`Widget event received: ${event.detail.type}`, 'success');
+                if (event.detail.data) {
+                    log(`Event data: ${JSON.stringify(event.detail.data)}`, 'info');
+                }
+            };
+            
+            window.addEventListener('etic-ai-widget-message', testEventListener);
+            log('Event listener registered for widget events', 'success');
+            
+            // Trigger some events
+            setTimeout(() => {
+                if (window.EticAI) {
+                    window.EticAI.open();
+                    setTimeout(() => window.EticAI.close(), 2000);
+                }
+            }, 1000);
+        }
+        
+        // Initialize status panel
+        updateStatus();
+        
+        // Update status every 5 seconds
+        setInterval(updateStatus, 5000);
+        
+        // Log initial state
+        log('Test suite initialized and ready', 'success');
+        log(`Current origin: ${window.location.origin}`, 'info');
+        log('Click "Initialize Widget" to begin testing', 'info');
+    </script>
+</body>
+</html>

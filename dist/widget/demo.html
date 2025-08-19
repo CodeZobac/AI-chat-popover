@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETIC AI Widget Demo - Embeddable Version</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #f0f0f0;
+        }
+        
+        p, li {
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        
+        ul {
+            padding-left: 1.5rem;
+        }
+        
+        .highlight {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .integration-example {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .status {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            z-index: 1000;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="status" id="status">Widget Status: Loading...</div>
+    
+    <div class="container">
+        <h1>🤖 ETIC AI Widget Demo</h1>
+        
+        <div class="card">
+            <h2>Embeddable Chat Widget</h2>
+            <p>This page demonstrates the standalone ETIC AI chatbot widget that can be embedded on any website. The widget is completely self-contained and uses Shadow DOM for style isolation.</p>
+            
+            <div class="controls">
+                <button onclick="openWidget()">Open Widget</button>
+                <button onclick="closeWidget()">Close Widget</button>
+                <button onclick="changeTheme()">Toggle Theme</button>
+                <button onclick="changePosition()">Change Position</button>
+                <button onclick="destroyWidget()">Destroy Widget</button>
+                <button onclick="reinitWidget()">Reinitialize</button>
+            </div>
+            
+            <div class="controls" style="margin-top: 1rem;">
+                <button onclick="showStatus()">Show Status</button>
+                <button onclick="showConfig()">Show Config</button>
+                <button onclick="testBrowserSupport()">Test Support</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Integration Instructions</h2>
+            <p>To embed this widget on your website, add the following code before the closing <span class="highlight">&lt;/body&gt;</span> tag:</p>
+            
+            <div class="integration-example">
+&lt;script&gt;
+  window.EticAI = {
+    config: {
+      apiKey: 'your-api-key', // Optional
+      theme: 'light', // 'light' or 'dark'
+      position: 'bottom-right', // 'bottom-right' or 'bottom-left'
+      primaryColor: '#2563eb', // Custom brand color
+      allowedOrigins: ['https://yourdomain.com'], // Security
+      autoOpen: false, // Auto-open on load
+      showWelcomeMessage: true // Show welcome message
+    }
+  };
+&lt;/script&gt;
+&lt;script src="https://etic-ai.vercel.app/widget/loader.js" async&gt;&lt;/script&gt;
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Features</h2>
+            <ul>
+                <li><strong>Shadow DOM Isolation:</strong> Styles won't conflict with your website</li>
+                <li><strong>Cross-Origin Support:</strong> Works on any domain with proper configuration</li>
+                <li><strong>Responsive Design:</strong> Adapts to mobile and desktop screens</li>
+                <li><strong>PostMessage API:</strong> Secure communication between domains</li>
+                <li><strong>Customizable:</strong> Theme, colors, and positioning options</li>
+                <li><strong>Lightweight:</strong> Minimal impact on page load performance</li>
+                <li><strong>Accessibility:</strong> Full keyboard navigation and screen reader support</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2>API Methods</h2>
+            <p>Once loaded, you can control the widget programmatically:</p>
+            <div class="integration-example">
+// Initialize the widget
+EticAI.init({
+  theme: 'dark',
+  position: 'bottom-left'
+});
+
+// Update configuration
+EticAI.updateConfig({
+  primaryColor: '#10b981'
+});
+
+// Destroy the widget
+EticAI.destroy();
+            </div>
+        </div>
+    </div>
+
+    <!-- Widget Configuration -->
+    <script>
+        let currentTheme = 'light';
+        let currentPosition = 'bottom-right';
+        
+        window.EticAI = {
+            config: {
+                theme: currentTheme,
+                position: currentPosition,
+                primaryColor: '#2563eb',
+                allowedOrigins: ['*'], // Allow all origins for demo
+                autoOpen: false,
+                showWelcomeMessage: true,
+                apiEndpoint: '/api/chat' // This would be your actual API endpoint
+            }
+        };
+        
+        // Control functions
+        function openWidget() {
+            if (window.EticAI && window.EticAI.open) {
+                window.EticAI.open();
+                updateStatus('Widget opened');
+            } else {
+                updateStatus('Widget not available');
+            }
+        }
+        
+        function closeWidget() {
+            if (window.EticAI && window.EticAI.close) {
+                window.EticAI.close();
+                updateStatus('Widget closed');
+            } else {
+                updateStatus('Widget not available');
+            }
+        }
+        
+        function changeTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            if (window.EticAI && window.EticAI.updateConfig) {
+                window.EticAI.updateConfig({ theme: currentTheme });
+                updateStatus(`Theme changed to ${currentTheme}`);
+            } else {
+                updateStatus('Widget not available for theme change');
+            }
+        }
+        
+        function changePosition() {
+            currentPosition = currentPosition === 'bottom-right' ? 'bottom-left' : 'bottom-right';
+            if (window.EticAI && window.EticAI.updateConfig) {
+                window.EticAI.updateConfig({ position: currentPosition });
+                updateStatus(`Position changed to ${currentPosition}`);
+            } else {
+                updateStatus('Widget not available for position change');
+            }
+        }
+        
+        function destroyWidget() {
+            if (window.EticAI && window.EticAI.destroy) {
+                window.EticAI.destroy();
+                updateStatus('Widget destroyed');
+            } else {
+                updateStatus('Widget not available for destruction');
+            }
+        }
+        
+        function reinitWidget() {
+            if (window.EticAI && window.EticAI.init) {
+                window.EticAI.init(window.EticAI.config);
+                updateStatus('Widget reinitialized');
+            } else {
+                updateStatus('Widget not available for reinitialization');
+            }
+        }
+        
+        function updateStatus(message) {
+            const status = document.getElementById('status');
+            status.textContent = `Widget Status: ${message}`;
+            setTimeout(() => {
+                status.textContent = 'Widget Status: Ready';
+            }, 3000);
+        }
+        
+        // Listen for widget events
+        window.addEventListener('etic-ai-widget-message', function(event) {
+            console.log('Widget event:', event.detail);
+            updateStatus(`Event: ${event.detail.type}`);
+        });
+        
+        // Update status when widget loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (window.EticAI && window.EticAI.getStatus) {
+                    const status = window.EticAI.getStatus();
+                    updateStatus(status.loaded ? 'Ready' : 'Loading...');
+                } else {
+                    updateStatus('Loading...');
+                }
+            }, 1000);
+        });
+        
+        // Additional demo functions
+        function showStatus() {
+            if (window.EticAI && window.EticAI.getStatus) {
+                const status = window.EticAI.getStatus();
+                alert(`Widget Status:\nLoaded: ${status.loaded}\nMode: ${status.mode}\nVersion: ${status.version}\nRetries: ${status.retryCount}`);
+            } else {
+                alert('Widget not available');
+            }
+        }
+        
+        function showConfig() {
+            if (window.EticAI && window.EticAI.getConfig) {
+                const config = window.EticAI.getConfig();
+                alert('Current Config:\n' + JSON.stringify(config, null, 2));
+            } else {
+                alert('Widget not available');
+            }
+        }
+        
+        function testBrowserSupport() {
+            if (window.EticAI && window.EticAI.isSupported) {
+                const supported = window.EticAI.isSupported();
+                updateStatus(`Browser ${supported ? 'supported' : 'not supported'}`);
+            } else {
+                updateStatus('Widget not available for support check');
+            }
+        }
+    </script>
+    
+    <!-- Load the widget (in production, this would be from your CDN) -->
+    <script src="./loader.js" async></script>
+</body>
+</html>

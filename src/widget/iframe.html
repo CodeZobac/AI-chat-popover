@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETIC AI Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent;
+        }
+        
+        .widget-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .widget-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            background: #2563eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .widget-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .widget-button.expanded {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        
+        .chat-interface {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 12px;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-interface.visible {
+            display: flex;
+        }
+        
+        .chat-header {
+            padding: 16px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .chat-title {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .close-button:hover {
+            background: #e5e7eb;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: #2563eb;
+            color: white;
+        }
+        
+        .message.assistant {
+            align-self: flex-start;
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .chat-input {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 24px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .input-field:focus {
+            border-color: #2563eb;
+        }
+        
+        .send-button {
+            padding: 12px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .send-button:hover {
+            background: #1d4ed8;
+        }
+        
+        .send-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .loading-dots {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .loading-dot {
+            width: 4px;
+            height: 4px;
+            background: #6b7280;
+            border-radius: 50%;
+            animation: loading 1.4s infinite ease-in-out;
+        }
+        
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes loading {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .error-message {
+            color: #dc2626;
+            font-size: 14px;
+            text-align: center;
+            padding: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <button class="widget-button" id="widgetButton">
+            💬
+        </button>
+        
+        <div class="chat-interface" id="chatInterface">
+            <div class="chat-header">
+                <div class="chat-title" id="chatTitle">ETIC AI</div>
+                <button class="close-button" id="closeButton">×</button>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message assistant">
+                    Hello! I'm ETIC AI, your virtual assistant. How can I help you learn more about ETIC Algarve?
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" class="input-field" id="messageInput" placeholder="Type your message...">
+                <button class="send-button" id="sendButton">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+            
+            let config = {};
+            let isExpanded = false;
+            let messages = [];
+            
+            // DOM elements
+            const widgetButton = document.getElementById('widgetButton');
+            const chatInterface = document.getElementById('chatInterface');
+            const chatTitle = document.getElementById('chatTitle');
+            const closeButton = document.getElementById('closeButton');
+            const chatMessages = document.getElementById('chatMessages');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            
+            // Initialize from URL parameters
+            function init() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const configParam = urlParams.get('config');
+                const origin = urlParams.get('origin');
+                
+                if (configParam) {
+                    try {
+                        config = JSON.parse(atob(configParam));
+                        applyConfig();
+                    } catch (e) {
+                        console.error('Failed to parse config:', e);
+                    }
+                }
+                
+                // Set up event listeners
+                widgetButton.addEventListener('click', toggleChat);
+                closeButton.addEventListener('click', closeChat);
+                sendButton.addEventListener('click', sendMessage);
+                messageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+                
+                // Listen for parent messages
+                window.addEventListener('message', handleParentMessage);
+                
+                // Notify parent of initialization
+                notifyParent('initialized', { origin: window.location.origin });
+            }
+            
+            function applyConfig() {
+                // Apply theme
+                if (config.theme === 'dark') {
+                    document.body.style.background = '#1f2937';
+                    chatInterface.style.background = '#374151';
+                    chatInterface.style.color = '#f9fafb';
+                }
+                
+                // Apply colors
+                if (config.primaryColor) {
+                    widgetButton.style.background = config.primaryColor;
+                    sendButton.style.background = config.primaryColor;
+                    
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .input-field:focus { border-color: ${config.primaryColor}; }
+                        .message.user { background: ${config.primaryColor}; }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Apply branding
+                if (config.branding && config.branding.name) {
+                    chatTitle.textContent = config.branding.name;
+                }
+            }
+            
+            function toggleChat() {
+                if (isExpanded) {
+                    closeChat();
+                } else {
+                    openChat();
+                }
+            }
+            
+            function openChat() {
+                isExpanded = true;
+                widgetButton.classList.add('expanded');
+                chatInterface.classList.add('visible');
+                widgetButton.style.display = 'none';
+                
+                // Notify parent to resize
+                notifyParent('resize', { expanded: true });
+                
+                // Focus input
+                setTimeout(() => messageInput.focus(), 100);
+            }
+            
+            function closeChat() {
+                isExpanded = false;
+                widgetButton.classList.remove('expanded');
+                chatInterface.classList.remove('visible');
+                widgetButton.style.display = 'flex';
+                
+                // Notify parent to resize
+                notifyParent('resize', { expanded: false });
+            }
+            
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (!message) return;
+                
+                // Add user message
+                addMessage('user', message);
+                messageInput.value = '';
+                sendButton.disabled = true;
+                
+                // Show loading
+                showLoading();
+                
+                // Simulate API call (in real implementation, this would call the actual API)
+                setTimeout(() => {
+                    hideLoading();
+                    addMessage('assistant', 'Thank you for your message! This is a demo response. In the full implementation, this would connect to the ETIC AI API.');
+                    sendButton.disabled = false;
+                }, 1500);
+            }
+            
+            function addMessage(role, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${role}`;
+                messageDiv.textContent = content;
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                messages.push({ role, content, timestamp: new Date() });
+            }
+            
+            function showLoading() {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'loading';
+                loadingDiv.id = 'loadingIndicator';
+                loadingDiv.innerHTML = `
+                    <span>ETIC AI is typing</span>
+                    <div class="loading-dots">
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                    </div>
+                `;
+                
+                chatMessages.appendChild(loadingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function hideLoading() {
+                const loadingDiv = document.getElementById('loadingIndicator');
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+            }
+            
+            function handleParentMessage(event) {
+                const { type, config: newConfig } = event.data;
+                
+                switch (type) {
+                    case 'updateConfig':
+                        config = { ...config, ...newConfig };
+                        applyConfig();
+                        break;
+                    case 'open':
+                        openChat();
+                        break;
+                    case 'close':
+                        closeChat();
+                        break;
+                    case 'toggle':
+                        toggleChat();
+                        break;
+                }
+            }
+            
+            function notifyParent(type, data) {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type, data }, '*');
+                }
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+            
+        })();
+    </script>
+</body>
+</html>
