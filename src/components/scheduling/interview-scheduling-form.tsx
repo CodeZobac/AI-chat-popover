@@ -19,7 +19,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -117,11 +121,14 @@ export function InterviewSchedulingForm({
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Contact Information Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Contact Information</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -181,14 +188,17 @@ export function InterviewSchedulingForm({
             {/* Program Interest Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Program Interest</h3>
-              
+
               <FormField
                 control={form.control}
                 name="programInterest"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Which program interests you most? *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a program" />
@@ -211,13 +221,15 @@ export function InterviewSchedulingForm({
             {/* Interview Format Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Interview Format</h3>
-              
+
               <FormField
                 control={form.control}
                 name="format"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel>How would you prefer to conduct the interview? *</FormLabel>
+                    <FormLabel>
+                      How would you prefer to conduct the interview? *
+                    </FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -226,19 +238,28 @@ export function InterviewSchedulingForm({
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="video" id="video" />
-                          <label htmlFor="video" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="video"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Video Call (Recommended)
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="in-person" id="in-person" />
-                          <label htmlFor="in-person" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="in-person"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             In-Person at Campus
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="phone" id="phone" />
-                          <label htmlFor="phone" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="phone"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Phone Call
                           </label>
                         </div>
@@ -253,7 +274,7 @@ export function InterviewSchedulingForm({
             {/* Scheduling Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Preferred Schedule</h3>
-              
+
               <FormField
                 control={form.control}
                 name="preferredDate"
@@ -313,19 +334,28 @@ export function InterviewSchedulingForm({
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="morning" id="morning" />
-                          <label htmlFor="morning" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="morning"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Morning (9:00 AM - 12:00 PM)
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="afternoon" id="afternoon" />
-                          <label htmlFor="afternoon" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="afternoon"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Afternoon (1:00 PM - 5:00 PM)
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="specific" id="specific" />
-                          <label htmlFor="specific" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="specific"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Specific Time
                           </label>
                         </div>
@@ -366,7 +396,7 @@ export function InterviewSchedulingForm({
             {/* Additional Notes Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Additional Information</h3>
-              
+
               <FormField
                 control={form.control}
                 name="notes"
@@ -381,7 +411,8 @@ export function InterviewSchedulingForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      Share any specific questions or topics you'd like to discuss (max 500 characters)
+                      Share any specific questions or topics you&apos;d like to
+                      discuss (max 500 characters)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -396,7 +427,9 @@ export function InterviewSchedulingForm({
                 disabled={isSubmitting || isLoading}
                 className="flex-1"
               >
-                {isSubmitting || isLoading ? "Scheduling..." : "Schedule Interview"}
+                {isSubmitting || isLoading
+                  ? "Scheduling..."
+                  : "Schedule Interview"}
               </Button>
               {onCancel && (
                 <Button

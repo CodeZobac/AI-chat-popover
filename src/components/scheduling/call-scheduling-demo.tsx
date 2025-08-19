@@ -8,15 +8,16 @@ import type { CallSchedulingFormData } from "@/types/validation";
 
 export function CallSchedulingDemo() {
   const [showForm, setShowForm] = useState(false);
-  const [submittedData, setSubmittedData] = useState<CallSchedulingFormData | null>(null);
+  const [submittedData, setSubmittedData] =
+    useState<CallSchedulingFormData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (data: CallSchedulingFormData) => {
     setIsLoading(true);
-    
+
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     console.log("Call scheduling data:", data);
     setSubmittedData(data);
     setShowForm(false);
@@ -42,7 +43,7 @@ export function CallSchedulingDemo() {
       "international-student": "International Student Support",
       "technical-questions": "Technical Questions & Prerequisites",
       "general-consultation": "General Consultation",
-      "other": "Other",
+      other: "Other",
     };
     return purposes[value as keyof typeof purposes] || value;
   };
@@ -73,29 +74,60 @@ export function CallSchedulingDemo() {
     return (
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-green-600">Call Scheduled Successfully!</CardTitle>
+          <CardTitle className="text-green-600">
+            Call Scheduled Successfully!
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
             <h3 className="font-semibold mb-2">Call Details:</h3>
             <div className="space-y-2 text-sm">
-              <p><strong>Name:</strong> {submittedData.name}</p>
-              <p><strong>Email:</strong> {submittedData.email}</p>
-              {submittedData.phone && <p><strong>Phone:</strong> {submittedData.phone}</p>}
-              <p><strong>Purpose:</strong> {getCallPurposeLabel(submittedData.callPurpose)}</p>
-              <p><strong>Date:</strong> {submittedData.preferredDate.toDateString()}</p>
-              <p><strong>Time:</strong> {submittedData.timePreference === "specific" ? submittedData.specificTime : submittedData.timePreference}</p>
-              <p><strong>Timezone:</strong> {getTimezoneLabel(submittedData.timezone || "Europe/Lisbon")}</p>
-              {submittedData.notes && <p><strong>Notes:</strong> {submittedData.notes}</p>}
+              <p>
+                <strong>Name:</strong> {submittedData.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {submittedData.email}
+              </p>
+              {submittedData.phone && (
+                <p>
+                  <strong>Phone:</strong> {submittedData.phone}
+                </p>
+              )}
+              <p>
+                <strong>Purpose:</strong>{" "}
+                {getCallPurposeLabel(submittedData.callPurpose)}
+              </p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {submittedData.preferredDate.toDateString()}
+              </p>
+              <p>
+                <strong>Time:</strong>{" "}
+                {submittedData.timePreference === "specific"
+                  ? submittedData.specificTime
+                  : submittedData.timePreference}
+              </p>
+              <p>
+                <strong>Timezone:</strong>{" "}
+                {getTimezoneLabel(submittedData.timezone || "Europe/Lisbon")}
+              </p>
+              {submittedData.notes && (
+                <p>
+                  <strong>Notes:</strong> {submittedData.notes}
+                </p>
+              )}
             </div>
           </div>
           <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
             <h4 className="font-medium mb-2">What happens next?</h4>
             <ul className="text-sm space-y-1 list-disc list-inside">
-              <li>You'll receive a confirmation email within 24 hours</li>
+              <li>You&apos;ll receive a confirmation email within 24 hours</li>
               <li>Our admissions team will call you at the scheduled time</li>
               <li>The call typically lasts 20-30 minutes</li>
-              <li>You can reschedule if needed by replying to the confirmation email</li>
+              <li>
+                You can reschedule if needed by replying to the confirmation
+                email
+              </li>
             </ul>
           </div>
           <Button onClick={resetDemo} className="w-full">
@@ -123,7 +155,8 @@ export function CallSchedulingDemo() {
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground mb-4">
-          This is a demo of the call scheduling form component. Click the button below to test the form.
+          This is a demo of the call scheduling form component. Click the button
+          below to test the form.
         </p>
         <Button onClick={() => setShowForm(true)} className="w-full">
           Open Call Scheduling Form

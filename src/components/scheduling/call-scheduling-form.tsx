@@ -20,7 +20,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -54,7 +58,10 @@ const CALL_PURPOSE_OPTIONS = [
   { value: "career-guidance", label: "Career Guidance & Opportunities" },
   { value: "financial-aid", label: "Financial Aid & Scholarships" },
   { value: "international-student", label: "International Student Support" },
-  { value: "technical-questions", label: "Technical Questions & Prerequisites" },
+  {
+    value: "technical-questions",
+    label: "Technical Questions & Prerequisites",
+  },
   { value: "general-consultation", label: "General Consultation" },
   { value: "other", label: "Other (please specify in notes)" },
 ];
@@ -96,7 +103,9 @@ export function CallSchedulingForm({
 
   // Detect user's timezone
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const defaultTimezone = TIMEZONE_OPTIONS.find(tz => tz.value === userTimezone)?.value || "Europe/Lisbon";
+  const defaultTimezone =
+    TIMEZONE_OPTIONS.find((tz) => tz.value === userTimezone)?.value ||
+    "Europe/Lisbon";
 
   const form = useForm<CallSchedulingFormData>({
     resolver: zodResolver(callSchedulingSchema),
@@ -137,11 +146,9 @@ export function CallSchedulingForm({
   const isDateAvailable = (date: Date) => {
     const today = startOfDay(new Date());
     const maxDate = addDays(today, 90); // 3 months in advance
-    
+
     return (
-      !isBefore(date, today) &&
-      !isBefore(maxDate, date) &&
-      !isWeekend(date)
+      !isBefore(date, today) && !isBefore(maxDate, date) && !isWeekend(date)
     );
   };
 
@@ -151,17 +158,19 @@ export function CallSchedulingForm({
     bookedSlots: string[];
     isLoading: boolean;
   }>({
-    availableSlots: TIME_SLOTS.map(slot => slot.value),
+    availableSlots: TIME_SLOTS.map((slot) => slot.value),
     bookedSlots: [],
     isLoading: false,
   });
 
   // Fetch availability when date or timezone changes
   const fetchAvailability = async (date: Date, timezone: string) => {
-    setAvailabilityData(prev => ({ ...prev, isLoading: true }));
-    
+    setAvailabilityData((prev) => ({ ...prev, isLoading: true }));
+
     try {
-      const response = await fetch(`/api/scheduling/call?date=${date.toISOString()}&timezone=${timezone}`);
+      const response = await fetch(
+        `/api/scheduling/call?date=${date.toISOString()}&timezone=${timezone}`
+      );
       if (response.ok) {
         const data = await response.json();
         setAvailabilityData({
@@ -172,7 +181,7 @@ export function CallSchedulingForm({
       } else {
         // Fallback to default availability
         setAvailabilityData({
-          availableSlots: TIME_SLOTS.map(slot => slot.value),
+          availableSlots: TIME_SLOTS.map((slot) => slot.value),
           bookedSlots: [],
           isLoading: false,
         });
@@ -181,7 +190,7 @@ export function CallSchedulingForm({
       console.error("Error fetching availability:", error);
       // Fallback to default availability
       setAvailabilityData({
-        availableSlots: TIME_SLOTS.map(slot => slot.value),
+        availableSlots: TIME_SLOTS.map((slot) => slot.value),
         bookedSlots: [],
         isLoading: false,
       });
@@ -191,10 +200,12 @@ export function CallSchedulingForm({
   // Get available time slots for the selected date
   const getAvailableTimeSlots = (date: Date | undefined) => {
     if (!date) return TIME_SLOTS;
-    
-    return TIME_SLOTS.map(slot => ({
+
+    return TIME_SLOTS.map((slot) => ({
       ...slot,
-      available: availabilityData.availableSlots.includes(slot.value) && !availabilityData.isLoading
+      available:
+        availabilityData.availableSlots.includes(slot.value) &&
+        !availabilityData.isLoading,
     }));
   };
 
@@ -216,17 +227,21 @@ export function CallSchedulingForm({
             <h2 className="text-xl font-semibold">Schedule Phone Call</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Book a personalized phone consultation with our admissions team to discuss
-            your educational goals and learn more about ETIC Algarve programs.
+            Book a personalized phone consultation with our admissions team to
+            discuss your educational goals and learn more about ETIC Algarve
+            programs.
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Contact Information Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Contact Information</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -275,7 +290,8 @@ export function CallSchedulingForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      Include country code for international numbers. This is where we'll call you.
+                      Include country code for international numbers. This is
+                      where we&apos;ll call you.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -286,14 +302,17 @@ export function CallSchedulingForm({
             {/* Call Details Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Call Details</h3>
-              
+
               <FormField
                 control={form.control}
                 name="callPurpose"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Purpose of Call *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select the main topic for discussion" />
@@ -308,7 +327,8 @@ export function CallSchedulingForm({
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      This helps us prepare for your call and connect you with the right specialist
+                      This helps us prepare for your call and connect you with
+                      the right specialist
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -321,7 +341,10 @@ export function CallSchedulingForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Your Timezone *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your timezone" />
@@ -339,7 +362,7 @@ export function CallSchedulingForm({
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      We'll schedule the call according to your local time
+                      We&apos;ll schedule the call according to your local time
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -350,7 +373,7 @@ export function CallSchedulingForm({
             {/* Date & Time Selection Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Select Date & Time</h3>
-              
+
               <FormField
                 control={form.control}
                 name="preferredDate"
@@ -387,7 +410,8 @@ export function CallSchedulingForm({
                       </PopoverContent>
                     </Popover>
                     <FormDescription>
-                      Calls are available Monday through Friday, up to 3 months in advance
+                      Calls are available Monday through Friday, up to 3 months
+                      in advance
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -413,26 +437,39 @@ export function CallSchedulingForm({
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="morning" id="call-morning" />
-                          <label htmlFor="call-morning" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="call-morning"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Morning (9:00 AM - 12:00 PM)
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="afternoon" id="call-afternoon" />
-                          <label htmlFor="call-afternoon" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <RadioGroupItem
+                            value="afternoon"
+                            id="call-afternoon"
+                          />
+                          <label
+                            htmlFor="call-afternoon"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Afternoon (2:00 PM - 6:00 PM)
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="specific" id="call-specific" />
-                          <label htmlFor="call-specific" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="call-specific"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Specific Time Slot
                           </label>
                         </div>
                       </RadioGroup>
                     </FormControl>
                     <FormDescription>
-                      All times shown in your selected timezone ({watchTimezone?.split('/')[1]?.replace('_', ' ')})
+                      All times shown in your selected timezone (
+                      {watchTimezone?.split("/")[1]?.replace("_", " ")})
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -447,7 +484,11 @@ export function CallSchedulingForm({
                       <Button
                         key={slot.value}
                         type="button"
-                        variant={selectedTimeSlot === slot.value ? "default" : "outline"}
+                        variant={
+                          selectedTimeSlot === slot.value
+                            ? "default"
+                            : "outline"
+                        }
                         disabled={!slot.available}
                         onClick={() => {
                           setSelectedTimeSlot(slot.value);
@@ -458,18 +499,24 @@ export function CallSchedulingForm({
                         <ClockIcon className="h-4 w-4" />
                         <span className="text-sm">{slot.label}</span>
                         {!slot.available && (
-                          <span className="text-xs text-muted-foreground">Unavailable</span>
+                          <span className="text-xs text-muted-foreground">
+                            Unavailable
+                          </span>
                         )}
                       </Button>
                     ))}
                   </div>
                   {watchSelectedDate && (
                     <FormDescription>
-                      Available time slots for {format(watchSelectedDate, "EEEE, MMMM d")} in your timezone
+                      Available time slots for{" "}
+                      {format(watchSelectedDate, "EEEE, MMMM d")} in your
+                      timezone
                     </FormDescription>
                   )}
                   {watchTimePreference === "specific" && !selectedTimeSlot && (
-                    <p className="text-sm text-destructive">Please select a time slot</p>
+                    <p className="text-sm text-destructive">
+                      Please select a time slot
+                    </p>
                   )}
                 </div>
               )}
@@ -478,7 +525,7 @@ export function CallSchedulingForm({
             {/* Additional Notes Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Additional Information</h3>
-              
+
               <FormField
                 control={form.control}
                 name="notes"
@@ -493,7 +540,8 @@ export function CallSchedulingForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      Share any specific questions or topics you'd like to discuss (max 500 characters)
+                      Share any specific questions or topics you&apos;d like to
+                      discuss (max 500 characters)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -505,10 +553,16 @@ export function CallSchedulingForm({
             <div className="flex flex-col sm:flex-row gap-3 pt-6">
               <Button
                 type="submit"
-                disabled={isSubmitting || isLoading || (watchTimePreference === "specific" && !selectedTimeSlot)}
+                disabled={
+                  isSubmitting ||
+                  isLoading ||
+                  (watchTimePreference === "specific" && !selectedTimeSlot)
+                }
                 className="flex-1"
               >
-                {isSubmitting || isLoading ? "Scheduling Call..." : "Schedule Phone Call"}
+                {isSubmitting || isLoading
+                  ? "Scheduling Call..."
+                  : "Schedule Phone Call"}
               </Button>
               {onCancel && (
                 <Button

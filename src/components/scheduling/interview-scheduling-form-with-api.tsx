@@ -23,7 +23,7 @@ interface ApiResponse {
     };
   };
   error?: string;
-  details?: any[];
+  details?: unknown[];
 }
 
 interface InterviewSchedulingFormWithApiProps {
@@ -64,7 +64,7 @@ export function InterviewSchedulingFormWithApi({
           message: result.message,
           referenceNumber: result.data.referenceNumber,
         });
-        
+
         // Call the success callback if provided
         if (onSuccess) {
           onSuccess(result.data.referenceNumber);
@@ -95,7 +95,9 @@ export function InterviewSchedulingFormWithApi({
         <CardHeader>
           <div className="flex items-center gap-2">
             <CheckCircleIcon className="h-6 w-6 text-green-600" />
-            <CardTitle className="text-green-600">Interview Scheduled Successfully!</CardTitle>
+            <CardTitle className="text-green-600">
+              Interview Scheduled Successfully!
+            </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -105,18 +107,29 @@ export function InterviewSchedulingFormWithApi({
             </p>
             {submissionState.referenceNumber && (
               <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                Reference Number: <span className="font-mono">{submissionState.referenceNumber}</span>
+                Reference Number:{" "}
+                <span className="font-mono">
+                  {submissionState.referenceNumber}
+                </span>
               </p>
             )}
           </div>
-          
+
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>What happens next:</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>You'll receive a confirmation email within 5 minutes</li>
-              <li>Our admissions team will contact you within 24 hours to confirm your interview time</li>
-              <li>You'll receive calendar invitation and meeting details</li>
-              <li>If you have any questions, please contact us with your reference number</li>
+              <li>You&apos;ll receive a confirmation email within 5 minutes</li>
+              <li>
+                Our admissions team will contact you within 24 hours to confirm
+                your interview time
+              </li>
+              <li>
+                You&apos;ll receive calendar invitation and meeting details
+              </li>
+              <li>
+                If you have any questions, please contact us with your reference
+                number
+              </li>
             </ul>
           </div>
 
@@ -151,7 +164,7 @@ export function InterviewSchedulingFormWithApi({
               {submissionState.error}
             </p>
           </div>
-          
+
           <div className="flex gap-3">
             <Button onClick={handleReset} className="flex-1">
               Try Again

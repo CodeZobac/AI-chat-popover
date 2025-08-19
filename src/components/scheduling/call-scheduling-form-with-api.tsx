@@ -29,7 +29,8 @@ export function CallSchedulingFormWithApi({
   initialData,
 }: CallSchedulingFormWithApiProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
+  const [submissionResult, setSubmissionResult] =
+    useState<SubmissionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (data: CallSchedulingFormData) => {
@@ -55,7 +56,9 @@ export function CallSchedulingFormWithApi({
       onSuccess?.(data);
     } catch (err) {
       console.error("Error submitting call scheduling form:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +85,7 @@ export function CallSchedulingFormWithApi({
       "international-student": "International Student Support",
       "technical-questions": "Technical Questions & Prerequisites",
       "general-consultation": "General Consultation",
-      "other": "Other",
+      other: "Other",
     };
     return purposes[value as keyof typeof purposes] || value;
   };
@@ -116,18 +119,34 @@ export function CallSchedulingFormWithApi({
         <CardHeader>
           <div className="flex items-center gap-2">
             <CheckCircleIcon className="h-6 w-6 text-green-600" />
-            <CardTitle className="text-green-600">Call Scheduled Successfully!</CardTitle>
+            <CardTitle className="text-green-600">
+              Call Scheduled Successfully!
+            </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
             <h3 className="font-semibold mb-3">Call Details:</h3>
             <div className="space-y-2 text-sm">
-              <p><strong>Reference Number:</strong> {submissionResult.referenceNumber}</p>
-              <p><strong>Date:</strong> {submissionResult.scheduledDate?.toDateString()}</p>
-              <p><strong>Time:</strong> {submissionResult.scheduledTime}</p>
-              <p><strong>Timezone:</strong> {getTimezoneLabel(submissionResult.timezone || "Europe/Lisbon")}</p>
-              <p><strong>Purpose:</strong> {getCallPurposeLabel(submissionResult.callPurpose || "")}</p>
+              <p>
+                <strong>Reference Number:</strong>{" "}
+                {submissionResult.referenceNumber}
+              </p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {submissionResult.scheduledDate?.toDateString()}
+              </p>
+              <p>
+                <strong>Time:</strong> {submissionResult.scheduledTime}
+              </p>
+              <p>
+                <strong>Timezone:</strong>{" "}
+                {getTimezoneLabel(submissionResult.timezone || "Europe/Lisbon")}
+              </p>
+              <p>
+                <strong>Purpose:</strong>{" "}
+                {getCallPurposeLabel(submissionResult.callPurpose || "")}
+              </p>
             </div>
           </div>
 
@@ -137,11 +156,19 @@ export function CallSchedulingFormWithApi({
               What happens next?
             </h4>
             <ul className="text-sm space-y-2 list-disc list-inside">
-              <li>You'll receive a confirmation email within 24 hours with all the details</li>
+              <li>
+                You&apos;ll receive a confirmation email within 24 hours with
+                all the details
+              </li>
               <li>Our admissions team will call you at the scheduled time</li>
               <li>The call typically lasts 20-30 minutes</li>
-              <li>Please ensure your phone is available at the scheduled time</li>
-              <li>You can reschedule if needed by replying to the confirmation email</li>
+              <li>
+                Please ensure your phone is available at the scheduled time
+              </li>
+              <li>
+                You can reschedule if needed by replying to the confirmation
+                email
+              </li>
             </ul>
           </div>
 
@@ -149,7 +176,9 @@ export function CallSchedulingFormWithApi({
             <h4 className="font-medium mb-2">Important Notes:</h4>
             <ul className="text-sm space-y-1 list-disc list-inside">
               <li>Please save the reference number for your records</li>
-              <li>If you need to cancel, please give us at least 24 hours notice</li>
+              <li>
+                If you need to cancel, please give us at least 24 hours notice
+              </li>
               <li>International calls are made at no cost to you</li>
             </ul>
           </div>
@@ -159,7 +188,11 @@ export function CallSchedulingFormWithApi({
               Schedule Another Call
             </Button>
             {onCancel && (
-              <Button variant="outline" onClick={handleCancel} className="flex-1 sm:flex-none">
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                className="flex-1 sm:flex-none"
+              >
                 Close
               </Button>
             )}
@@ -185,7 +218,11 @@ export function CallSchedulingFormWithApi({
               Try Again
             </Button>
             {onCancel && (
-              <Button variant="outline" onClick={handleCancel} className="flex-1 sm:flex-none">
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                className="flex-1 sm:flex-none"
+              >
                 Cancel
               </Button>
             )}
