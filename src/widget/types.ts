@@ -3,34 +3,34 @@ export interface WidgetConfig {
   apiKey?: string;
   apiEndpoint?: string;
   widgetUrl?: string;
-  
+
   // Appearance
-  theme?: 'light' | 'dark';
-  position?: 'bottom-right' | 'bottom-left';
+  theme?: "light" | "dark";
+  position?: "bottom-right" | "bottom-left";
   primaryColor?: string;
   secondaryColor?: string;
   textColor?: string;
-  
+
   // Security
   allowedOrigins?: string[];
-  
+
   // Behavior
   sessionId?: string;
   autoOpen?: boolean;
   showWelcomeMessage?: boolean;
-  
+
   // Branding
   branding?: {
     name?: string;
     logo?: string;
     showPoweredBy?: boolean;
   };
-  
+
   // Customization
   customStyles?: {
     [key: string]: string;
   };
-  
+
   // Advanced
   debug?: boolean;
   fallbackToIframe?: boolean;
@@ -39,7 +39,7 @@ export interface WidgetConfig {
 
 export interface WidgetStatus {
   loaded: boolean;
-  mode: 'script' | 'iframe';
+  mode: "script" | "iframe";
   version: string;
   retryCount: number;
 }
@@ -51,14 +51,14 @@ export interface WidgetBranding {
 }
 
 export interface WidgetMessage {
-  type: 'init' | 'open' | 'close' | 'message' | 'config';
-  data?: any;
+  type: "init" | "open" | "close" | "message" | "config";
+  data?: unknown;
   origin?: string;
 }
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   createdAt: Date;
 }

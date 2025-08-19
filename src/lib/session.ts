@@ -1,5 +1,5 @@
-import { NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -7,21 +7,22 @@ const prisma = new PrismaClient();
  * Extracts session information from the request
  */
 export function extractSessionInfo(request: NextRequest) {
-  const sessionId = request.headers.get('x-session-id') || 
-                   request.cookies.get('session-id')?.value ||
-                   generateSessionId();
-  
-  const ipAddress = request.headers.get('x-forwarded-for') || 
-                   request.headers.get('x-real-ip') || 
-                   request.ip || 
-                   'unknown';
-  
-  const userAgent = request.headers.get('user-agent') || 'unknown';
+  const sessionId =
+    request.headers.get("x-session-id") ||
+    request.cookies.get("session-id")?.value ||
+    generateSessionId();
+
+  const ipAddress =
+    request.headers.get("x-forwarded-for") ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+
+  const userAgent = request.headers.get("user-agent") || "unknown";
 
   return {
     sessionId,
     ipAddress,
-    userAgent
+    userAgent,
   };
 }
 
@@ -45,7 +46,7 @@ export async function ensureUserSession(sessionInfo: {
   try {
     // Try to find existing session
     let session = await prisma.userSession.findUnique({
-      where: { sessionId: sessionInfo.sessionId }
+      where: { sessionId: sessionInfo.sessionId },
     });
 
     if (!session) {
@@ -55,7 +56,7 @@ export async function ensureUserSession(sessionInfo: {
           sessionId: sessionInfo.sessionId,
           ipAddress: sessionInfo.ipAddress,
           userAgent: sessionInfo.userAgent,
-        }
+        },
       });
     } else {
       // Update last activity
@@ -66,16 +67,16 @@ export async function ensureUserSession(sessionInfo: {
           // Update IP and user agent in case they changed
           ipAddress: sessionInfo.ipAddress,
           userAgent: sessionInfo.userAgent,
-        }
+        },
       });
     }
 
     return session;
   } catch (error) {
-    console.error('Error managing user session:', error);
+    console.error("Error managing user session:", error);
     // Return a minimal session object if database fails
     return {
-      id: 'temp_' + sessionInfo.sessionId,
+      id: "temp_" + sessionInfo.sessionId,
       sessionId: sessionInfo.sessionId,
       ipAddress: sessionInfo.ipAddress,
       userAgent: sessionInfo.userAgent,
@@ -91,7 +92,7 @@ export async function ensureUserSession(sessionInfo: {
 export async function validateSession(sessionId: string): Promise<boolean> {
   try {
     const session = await prisma.userSession.findUnique({
-      where: { sessionId }
+      where: { sessionId },
     });
 
     if (!session) {
@@ -104,7 +105,7 @@ export async function validateSession(sessionId: string): Promise<boolean> {
 
     return !isExpired;
   } catch (error) {
-    console.error('Error validating session:', error);
+    console.error("Error validating session:", error);
     return false;
   }
 }
@@ -114,20 +115,20 @@ export async function validateSession(sessionId: string): Promise<boolean> {
  */
 export async function cleanupOldSessions(maxAgeHours: number = 24) {
   try {
-    const cutoffDate = new Date(Date.now() - (maxAgeHours * 60 * 60 * 1000));
-    
+    const cutoffDate = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
+
     const result = await prisma.userSession.deleteMany({
       where: {
         lastActivity: {
-          lt: cutoffDate
-        }
-      }
+          lt: cutoffDate,
+        },
+      },
     });
 
     console.log(`Cleaned up ${result.count} old sessions`);
     return result.count;
   } catch (error) {
-    console.error('Error cleaning up old sessions:', error);
+    console.error("Error cleaning up old sessions:", error);
     return 0;
   }
 }
