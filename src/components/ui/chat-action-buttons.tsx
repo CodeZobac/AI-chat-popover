@@ -3,11 +3,16 @@
 import { useState } from "react";
 import { Calendar, Phone, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   InterviewSchedulingFormWithApi,
   TourSchedulingCalendarWithApi,
-  CallSchedulingFormWithApi 
+  CallSchedulingFormWithApi,
 } from "@/components/scheduling";
 
 interface ChatActionButtonsProps {
@@ -16,12 +21,19 @@ interface ChatActionButtonsProps {
   isLastMessage?: boolean;
 }
 
-export function ChatActionButtons({ messageId, className, isLastMessage = true }: ChatActionButtonsProps) {
+export function ChatActionButtons({
+  messageId,
+  className,
+  isLastMessage = true,
+}: ChatActionButtonsProps) {
+  const [activeDialog, setActiveDialog] = useState<
+    "interview" | "tour" | "call" | null
+  >(null);
+
   // Only show action buttons for the last assistant message to avoid clutter
   if (!isLastMessage) {
     return null;
   }
-  const [activeDialog, setActiveDialog] = useState<"interview" | "tour" | "call" | null>(null);
 
   const handleScheduleInterview = () => {
     setActiveDialog("interview");
@@ -51,7 +63,7 @@ export function ChatActionButtons({ messageId, className, isLastMessage = true }
           <UserCheck className="h-3 w-3" />
           Schedule Interview
         </Button>
-        
+
         <Button
           variant="outline"
           size="sm"
@@ -61,7 +73,7 @@ export function ChatActionButtons({ messageId, className, isLastMessage = true }
           <Calendar className="h-3 w-3" />
           Schedule Tour
         </Button>
-        
+
         <Button
           variant="outline"
           size="sm"
