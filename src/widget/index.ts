@@ -1,6 +1,6 @@
-import './styles.css';
-import { EticAIWidget } from './widget';
-import { WidgetConfig } from './types';
+import "./styles.css";
+import { EticAIWidget } from "./widget";
+import { WidgetConfig } from "./types";
 
 // Global interface for the widget
 declare global {
@@ -10,14 +10,21 @@ declare global {
       init?: (config?: WidgetConfig) => void;
       destroy?: () => void;
     };
-    EticAIWidget?: typeof EticAIWidget;
+    // EticAIWidget?: typeof EticAIWidget;
   }
 }
 
 // Auto-initialize if config is available
-if (typeof window !== 'undefined') {
-  // Make the widget class available globally
-  window.EticAIWidget = EticAIWidget;
+if (typeof window !== "undefined") {
+  // Skip global assignment during build to avoid type conflicts
+  if (process.env.NODE_ENV !== "production") {
+    // Make the widget class available globally in development
+    Object.defineProperty(window, "EticAIWidget", {
+      value: EticAIWidget,
+      writable: true,
+      configurable: true,
+    });
+  }
 
   // Auto-initialize if config is present
   if (window.EticAI?.config) {
@@ -37,4 +44,4 @@ if (typeof window !== 'undefined') {
 }
 
 export { EticAIWidget };
-export type { WidgetConfig } from './types';
+export type { WidgetConfig } from "./types";
