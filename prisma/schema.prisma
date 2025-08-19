@@ -59,6 +59,14 @@ model SchedulingRequest {
   programInterest String?
   notes           String?
   
+  // Tour-specific fields
+  groupSize       Int?
+  specialRequirements String?
+  
+  // Call-specific fields
+  callPurpose     String?
+  timezone        String?
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   

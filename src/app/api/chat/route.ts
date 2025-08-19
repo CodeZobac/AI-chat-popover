@@ -91,14 +91,9 @@ export async function POST(req: NextRequest) {
       model: google("gemini-2.0-flash-exp"),
       system: ETIC_SYSTEM_PROMPT,
       messages: coreMessages,
-      maxTokens: 1000,
-      temperature: 0.7,
-      // Add some safety settings
-      frequencyPenalty: 0.1,
-      presencePenalty: 0.1,
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error("Chat API Error:", error);
 
