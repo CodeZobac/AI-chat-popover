@@ -99,7 +99,19 @@ export const tourSchedulingSchema = z
 // Call scheduling form schema
 export const callSchedulingSchema = z
   .object({
-    ...contactInfoSchema.shape,
+    name: z
+      .string()
+      .min(2, "Name must be at least 2 characters")
+      .max(100, "Name must be less than 100 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    phone: z
+      .string()
+      .min(1, "Phone number is required for call scheduling")
+      .refine((phone) => {
+        // Basic phone validation - allows various formats
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ""));
+      }, "Please enter a valid phone number"),
     preferredDate: z
       .date({
         required_error: "Please select a preferred date",
