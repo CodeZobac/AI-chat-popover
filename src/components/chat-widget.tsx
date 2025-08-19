@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { useChat } from "ai/react";
+// Note: Using custom implementation instead of useChat due to version compatibility
 import { ChatWidgetIcon, useChatWidget } from "./chat-widget-icon";
 import { Chat } from "@/components/ui/chat";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,11 @@ import { cn } from "@/lib/utils";
 import { CHAT_CONFIG } from "@/lib/chat-config";
 import { saveChatToStorage, loadChatFromStorage } from "@/lib/chat-utils";
 import type { ChatWidgetProps } from "@/types/chat";
-import type { Message } from "@/components/ui/chat-message";
+
 
 interface ChatWidgetComponentProps extends ChatWidgetProps {
   sessionId?: string;
-  apiEndpoint?: string; // Currently unused but kept for future API integration
+  apiEndpoint?: string;
 }
 
 export function ChatWidget({
@@ -30,56 +30,133 @@ export function ChatWidget({
   const [isInitialized, setIsInitialized] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Local state for chat
-  const [messages, setMessages] = useState<Message[]>([]);
+  // Chat state management
+  interface ChatMessage {
+    id: string;
+    role: "user" | "assistant";
+    content: string;
+    createdAt: Date;
+  }
+  
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   };
 
-  // Handle form submission
-  const handleSubmit = async (e?: { preventDefault?: () => void }) => {
-    if (e?.preventDefault) {
-      e.preventDefault();
-    }
+  // Stop function
+  const stop = () => {
+    setIsLoading(false);
+  };
+
+  // Submit handler with API integration
+  const customHandleSubmit = async (e?: { preventDefault?: () => void }) => {
+    if (e?.preventDefault) e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage = {
+    const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      role: "user",
+      role: "user" as const,
       content: input.trim(),
       createdAt: new Date(),
     };
 
+    // Add user message immediately
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setError(null);
 
     try {
-      // This is a placeholder - in a real implementation, you'd call your API
-      // For now, just add a simple response
-      setTimeout(() => {
-        const assistantMessage = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content:
-            "Hello! I'm ETIC AI, your virtual assistant. I'm here to help you learn about ETIC Algarve's programs and services. How can I assist you today?",
-          createdAt: new Date(),
-        };
+      // Call the chat API
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        }),
+      });
 
-        setMessages((prev) => [...prev, assistantMessage]);
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
 
-        // Add notification if widget is closed
-        if (!widgetState.isOpen) {
-          widgetState.addNotification();
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("No response body");
+      }
+
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant" as const,
+        content: "",
+        createdAt: new Date(),
+      };
+
+      // Add empty assistant message
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      // Read the stream
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('0:')) {
+              try {
+                const content = line.slice(2);
+                assistantMessage.content += content;
+                
+                // Update the assistant message
+                setMessages((prev) => 
+                  prev.map((msg) => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, content: assistantMessage.content }
+                      : msg
+                  )
+                );
+              } catch (parseError) {
+                console.error("Error parsing stream chunk:", parseError);
+              }
+            }
+          }
         }
-      }, 1000);
-    } catch (error) {
-      console.error("Chat error:", error);
+      }
+
+      // Add notification if widget is closed
+      if (!widgetState.isOpen) {
+        widgetState.addNotification();
+      }
+    } catch (err) {
+      console.error("Chat error:", err);
+      setError(err as Error);
+      
+      // Add error message
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 2).toString(),
+        role: "assistant" as const,
+        content: "I'm sorry, I'm experiencing some technical difficulties. Please try again in a moment.",
+        createdAt: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -87,12 +164,7 @@ export function ChatWidget({
   // Handle append (for suggestions)
   const append = (message: { role: "user"; content: string }) => {
     setInput(message.content);
-    handleSubmit();
-  };
-
-  // Placeholder stop function
-  const stop = () => {
-    setIsLoading(false);
+    setTimeout(() => customHandleSubmit(), 0);
   };
 
   // Load chat history on mount
@@ -100,7 +172,14 @@ export function ChatWidget({
     if (!isInitialized) {
       const savedMessages = loadChatFromStorage(sessionId);
       if (savedMessages.length > 0) {
-        setMessages(savedMessages as Message[]);
+        // Convert saved messages to the format expected by the chat
+        const convertedMessages: ChatMessage[] = savedMessages.map((msg) => ({
+          id: msg.id,
+          role: msg.role as "user" | "assistant",
+          content: msg.content,
+          createdAt: msg.createdAt || new Date(),
+        }));
+        setMessages(convertedMessages);
       }
       setIsInitialized(true);
     }
@@ -109,9 +188,15 @@ export function ChatWidget({
   // Save messages to storage whenever they change
   useEffect(() => {
     if (isInitialized && messages.length > 0) {
-      // Type assertion needed due to different Message interfaces
+      // Convert messages to storage format
+      const messagesToSave = messages.map((msg) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        createdAt: msg.createdAt || new Date(),
+      }));
       saveChatToStorage(
-        messages as unknown as import("@/types/chat").Message[],
+        messagesToSave as unknown as import("@/types/chat").Message[],
         sessionId
       );
     }
@@ -234,31 +319,26 @@ export function ChatWidget({
 
             {/* Chat Interface */}
             <div className="flex-1 flex flex-col min-h-0">
-              {messages.length === 0 ? (
-                <Chat
-                  messages={messages}
-                  input={input}
-                  handleInputChange={handleInputChange}
-                  handleSubmit={handleSubmit}
-                  isGenerating={isLoading}
-                  stop={stop}
-                  append={append}
-                  suggestions={[...CHAT_CONFIG.suggestions]}
-                  className="flex-1 border-0"
-                  setMessages={setMessages}
-                />
-              ) : (
-                <Chat
-                  messages={messages}
-                  input={input}
-                  handleInputChange={handleInputChange}
-                  handleSubmit={handleSubmit}
-                  isGenerating={isLoading}
-                  stop={stop}
-                  className="flex-1 border-0"
-                  setMessages={setMessages}
-                />
+              {error && (
+                <div className="p-4 bg-destructive/10 border-b border-destructive/20">
+                  <p className="text-sm text-destructive">
+                    I&apos;m experiencing some technical difficulties. Please try again in a moment.
+                  </p>
+                </div>
               )}
+              
+              <Chat
+                messages={messages}
+                input={input}
+                handleInputChange={handleInputChange}
+                handleSubmit={customHandleSubmit}
+                isGenerating={isLoading}
+                stop={stop}
+                append={append}
+                suggestions={messages.length === 0 ? [...CHAT_CONFIG.suggestions] : []}
+                className="flex-1 border-0"
+                setMessages={setMessages}
+              />
             </div>
 
             {/* Footer */}

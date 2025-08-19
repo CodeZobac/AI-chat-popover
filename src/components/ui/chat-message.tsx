@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/collapsible"
 import { FilePreview } from "@/components/ui/file-preview"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import { ChatActionButtons } from "@/components/ui/chat-action-buttons"
 
 const chatBubbleVariants = cva(
   "group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[70%]",
@@ -136,9 +137,11 @@ export interface ChatMessageProps extends Message {
   showTimeStamp?: boolean
   animation?: Animation
   actions?: React.ReactNode
+  isLastAssistantMessage?: boolean
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
+  id,
   role,
   content,
   createdAt,
@@ -148,6 +151,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   experimental_attachments,
   toolInvocations,
   parts,
+  isLastAssistantMessage = false,
 }) => {
   const files = useMemo(() => {
     return experimental_attachments?.map((attachment) => {
@@ -218,6 +222,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               ) : null}
             </div>
 
+            {/* Add action buttons for assistant messages with text parts */}
+            {!isUser && <ChatActionButtons messageId={id} isLastMessage={isLastAssistantMessage} />}
+
             {showTimeStamp && createdAt ? (
               <time
                 dateTime={createdAt.toISOString()}
@@ -259,6 +266,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           </div>
         ) : null}
       </div>
+
+      {/* Add action buttons for assistant messages */}
+      {!isUser && <ChatActionButtons messageId={id} isLastMessage={isLastAssistantMessage} />}
 
       {showTimeStamp && createdAt ? (
         <time

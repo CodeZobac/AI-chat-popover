@@ -30,10 +30,16 @@ export function MessageList({
             ? messageOptions(message)
             : messageOptions
 
+        // Check if this is the last assistant message
+        const isLastAssistantMessage = 
+          message.role === "assistant" && 
+          index === messages.length - 1;
+
         return (
           <ChatMessage
             key={index}
             showTimeStamp={showTimeStamps}
+            isLastAssistantMessage={isLastAssistantMessage}
             {...message}
             {...additionalOptions}
           />
