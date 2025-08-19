@@ -1,20 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { WidgetConfig, ChatMessage } from '../types';
-
-// Utility function for class names
-function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
-}
+import React, { useState, useEffect, useRef } from "react";
+import { WidgetConfig, ChatMessage } from "../types";
 
 interface StandaloneChatWidgetProps {
   config: WidgetConfig;
-  onMessage: (type: string, data: any) => void;
+  onMessage: (type: string, data: unknown) => void;
 }
 
-export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidgetProps) {
+export function StandaloneChatWidget({
+  config,
+  onMessage,
+}: StandaloneChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(config.autoOpen || false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasNewMessages, setHasNewMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -22,18 +20,18 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
 
   // Position classes
   const positionClasses = {
-    'bottom-right': 'bottom-6 right-6',
-    'bottom-left': 'bottom-6 left-6',
+    "bottom-right": "bottom-6 right-6",
+    "bottom-left": "bottom-6 left-6",
   };
 
   const chatPositionClasses = {
-    'bottom-right': 'bottom-24 right-6',
-    'bottom-left': 'bottom-24 left-6',
+    "bottom-right": "bottom-24 right-6",
+    "bottom-left": "bottom-24 left-6",
   };
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -44,13 +42,13 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
   const toggleWidget = () => {
     const newIsOpen = !isOpen;
     setIsOpen(newIsOpen);
-    
+
     if (newIsOpen) {
       setHasNewMessages(false);
       setUnreadCount(0);
-      onMessage('open', {});
+      onMessage("open", {});
     } else {
-      onMessage('close', {});
+      onMessage("close", {});
     }
   };
 
@@ -61,25 +59,25 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      role: 'user',
+      role: "user",
       content: input.trim(),
       createdAt: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setIsLoading(true);
 
     try {
       // Make API call to chat endpoint
-      const response = await fetch(config.apiEndpoint || '/api/chat', {
-        method: 'POST',
+      const response = await fetch(config.apiEndpoint || "/api/chat", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          ...(config.apiKey && { 'Authorization': `Bearer ${config.apiKey}` }),
+          "Content-Type": "application/json",
+          ...(config.apiKey && { Authorization: `Bearer ${config.apiKey}` }),
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map(msg => ({
+          messages: [...messages, userMessage].map((msg) => ({
             role: msg.role,
             content: msg.content,
           })),
@@ -93,17 +91,17 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
       // Handle streaming response
       const reader = response.body?.getReader();
       if (!reader) {
-        throw new Error('No response body');
+        throw new Error("No response body");
       }
 
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: '',
+        role: "assistant",
+        content: "",
         createdAt: new Date(),
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
 
       const decoder = new TextDecoder();
       let done = false;
@@ -114,23 +112,23 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
 
         if (value) {
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
-          
+          const lines = chunk.split("\n");
+
           for (const line of lines) {
-            if (line.startsWith('0:')) {
+            if (line.startsWith("0:")) {
               try {
                 const content = line.slice(2);
                 assistantMessage.content += content;
-                
-                setMessages(prev => 
-                  prev.map(msg => 
-                    msg.id === assistantMessage.id 
+
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessage.id
                       ? { ...msg, content: assistantMessage.content }
                       : msg
                   )
                 );
               } catch (parseError) {
-                console.error('Error parsing stream chunk:', parseError);
+                console.error("Error parsing stream chunk:", parseError);
               }
             }
           }
@@ -140,21 +138,22 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
       // Add notification if widget is closed
       if (!isOpen) {
         setHasNewMessages(true);
-        setUnreadCount(prev => prev + 1);
+        setUnreadCount((prev) => prev + 1);
       }
 
-      onMessage('message', { message: assistantMessage });
+      onMessage("message", { message: assistantMessage });
     } catch (error) {
-      console.error('Chat error:', error);
-      
+      console.error("Chat error:", error);
+
       const errorMessage: ChatMessage = {
         id: (Date.now() + 2).toString(),
-        role: 'assistant',
-        content: "I'm sorry, I'm experiencing some technical difficulties. Please try again in a moment.",
+        role: "assistant",
+        content:
+          "I'm sorry, I'm experiencing some technical difficulties. Please try again in a moment.",
         createdAt: new Date(),
       };
-      
-      setMessages(prev => [...prev, errorMessage]);
+
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -170,9 +169,10 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
   useEffect(() => {
     if (config.showWelcomeMessage && messages.length === 0) {
       const welcomeMessage: ChatMessage = {
-        id: 'welcome',
-        role: 'assistant',
-        content: "Hello! I'm ETIC AI, your virtual assistant. I'm here to help you learn about ETIC Algarve's programs and answer any questions you might have. How can I assist you today?",
+        id: "welcome",
+        role: "assistant",
+        content:
+          "Hello! I'm ETIC AI, your virtual assistant. I'm here to help you learn about ETIC Algarve's programs and answer any questions you might have. How can I assist you today?",
         createdAt: new Date(),
       };
       setMessages([welcomeMessage]);
@@ -189,26 +189,50 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
   return (
     <div>
       {/* Chat Widget Button */}
-      <div className={`fixed z-50 ${positionClasses[config.position || 'bottom-right']}`}>
+      <div
+        className={`fixed z-50 ${
+          positionClasses[config.position || "bottom-right"]
+        }`}
+      >
         <button
           onClick={toggleWidget}
           className="widget-button w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
           aria-label={isOpen ? "Close chat" : "Open chat"}
         >
           {isOpen ? (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           ) : (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
             </svg>
           )}
-          
+
           {/* Notification badge */}
           {!isOpen && (hasNewMessages || unreadCount > 0) && (
             <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-semibold">
-              {unreadCount > 99 ? '99+' : unreadCount || '!'}
+              {unreadCount > 99 ? "99+" : unreadCount || "!"}
             </div>
           )}
         </button>
@@ -216,20 +240,24 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
 
       {/* Chat Interface */}
       {isOpen && (
-        <div className={`fixed z-40 w-96 h-96 widget-chat-container animate-fade-in ${chatPositionClasses[config.position || 'bottom-right']}`}>
+        <div
+          className={`fixed z-40 w-96 h-96 widget-chat-container animate-fade-in ${
+            chatPositionClasses[config.position || "bottom-right"]
+          }`}
+        >
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div 
+              <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                style={{ backgroundColor: config.primaryColor || '#2563eb' }}
+                style={{ backgroundColor: config.primaryColor || "#2563eb" }}
               >
                 AI
               </div>
               <div>
                 <h3 className="font-semibold text-sm">ETIC AI Assistant</h3>
                 <p className="text-xs text-gray-600">
-                  {isLoading ? 'Typing...' : 'Online'}
+                  {isLoading ? "Typing..." : "Online"}
                 </p>
               </div>
             </div>
@@ -238,8 +266,18 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
               className="text-gray-600 hover:text-gray-800 transition-colors"
               aria-label="Close chat"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -250,21 +288,21 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
               <div
                 key={message.id}
                 className={`mb-4 ${
-                  message.role === 'user' ? 'text-right' : 'text-left'
+                  message.role === "user" ? "text-right" : "text-left"
                 }`}
               >
                 <div
                   className={`inline-block max-w-xs px-4 py-2 rounded-lg ${
-                    message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-800'
+                    message.role === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-800"
                   }`}
                 >
                   {message.content}
                 </div>
               </div>
             ))}
-            
+
             {/* Suggestions */}
             {messages.length <= 1 && (
               <div className="mt-4">
@@ -282,19 +320,25 @@ export function StandaloneChatWidget({ config, onMessage }: StandaloneChatWidget
                 </div>
               </div>
             )}
-            
+
             {isLoading && (
               <div className="text-left mb-4">
                 <div className="inline-block bg-gray-200 px-4 py-2 rounded-lg">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"
+                      style={{ animationDelay: "0.4s" }}
+                    ></div>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +20,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -74,7 +78,7 @@ export function TourSchedulingCalendar({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
 
-  const form = useForm<TourSchedulingFormData>({
+  const form = useForm({
     resolver: zodResolver(tourSchedulingSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -83,7 +87,7 @@ export function TourSchedulingCalendar({
       preferredDate: initialData?.preferredDate || undefined,
       timePreference: initialData?.timePreference || "morning",
       specificTime: initialData?.specificTime || "",
-      groupSize: initialData?.groupSize || 1,
+      groupSize: initialData?.groupSize ?? 1,
       specialRequirements: initialData?.specialRequirements || "",
       notes: initialData?.notes || "",
     },
@@ -112,11 +116,9 @@ export function TourSchedulingCalendar({
   const isDateAvailable = (date: Date) => {
     const today = startOfDay(new Date());
     const maxDate = addDays(today, 60); // 2 months in advance
-    
+
     return (
-      !isBefore(date, today) &&
-      !isBefore(maxDate, date) &&
-      !isWeekend(date)
+      !isBefore(date, today) && !isBefore(maxDate, date) && !isWeekend(date)
     );
   };
 
@@ -126,17 +128,19 @@ export function TourSchedulingCalendar({
     bookedSlots: string[];
     isLoading: boolean;
   }>({
-    availableSlots: TIME_SLOTS.map(slot => slot.value),
+    availableSlots: TIME_SLOTS.map((slot) => slot.value),
     bookedSlots: [],
     isLoading: false,
   });
 
   // Fetch availability when date changes
   const fetchAvailability = async (date: Date) => {
-    setAvailabilityData(prev => ({ ...prev, isLoading: true }));
-    
+    setAvailabilityData((prev) => ({ ...prev, isLoading: true }));
+
     try {
-      const response = await fetch(`/api/scheduling/tour?date=${date.toISOString()}`);
+      const response = await fetch(
+        `/api/scheduling/tour?date=${date.toISOString()}`
+      );
       if (response.ok) {
         const data = await response.json();
         setAvailabilityData({
@@ -147,7 +151,7 @@ export function TourSchedulingCalendar({
       } else {
         // Fallback to default availability
         setAvailabilityData({
-          availableSlots: TIME_SLOTS.map(slot => slot.value),
+          availableSlots: TIME_SLOTS.map((slot) => slot.value),
           bookedSlots: [],
           isLoading: false,
         });
@@ -156,7 +160,7 @@ export function TourSchedulingCalendar({
       console.error("Error fetching availability:", error);
       // Fallback to default availability
       setAvailabilityData({
-        availableSlots: TIME_SLOTS.map(slot => slot.value),
+        availableSlots: TIME_SLOTS.map((slot) => slot.value),
         bookedSlots: [],
         isLoading: false,
       });
@@ -166,10 +170,12 @@ export function TourSchedulingCalendar({
   // Get available time slots for the selected date
   const getAvailableTimeSlots = (date: Date | undefined) => {
     if (!date) return TIME_SLOTS;
-    
-    return TIME_SLOTS.map(slot => ({
+
+    return TIME_SLOTS.map((slot) => ({
       ...slot,
-      available: availabilityData.availableSlots.includes(slot.value) && !availabilityData.isLoading
+      available:
+        availabilityData.availableSlots.includes(slot.value) &&
+        !availabilityData.isLoading,
     }));
   };
 
@@ -191,17 +197,21 @@ export function TourSchedulingCalendar({
             <h2 className="text-xl font-semibold">Schedule Campus Tour</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Book a guided tour of our ETIC Algarve campus to explore our facilities,
-            labs, and learning spaces. Tours are available Monday through Friday.
+            Book a guided tour of our ETIC Algarve campus to explore our
+            facilities, labs, and learning spaces. Tours are available Monday
+            through Friday.
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Contact Information Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Contact Information</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -261,15 +271,15 @@ export function TourSchedulingCalendar({
             {/* Tour Details Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Tour Details</h3>
-              
+
               <FormField
                 control={form.control}
                 name="groupSize"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Group Size *</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                    <Select
+                      onValueChange={(value) => field.onChange(parseInt(value))}
                       defaultValue={field.value?.toString()}
                     >
                       <FormControl>
@@ -279,7 +289,10 @@ export function TourSchedulingCalendar({
                       </FormControl>
                       <SelectContent>
                         {GROUP_SIZE_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value.toString()}>
+                          <SelectItem
+                            key={option.value}
+                            value={option.value.toString()}
+                          >
                             <div className="flex items-center gap-2">
                               <UsersIcon className="h-4 w-4" />
                               {option.label}
@@ -310,7 +323,8 @@ export function TourSchedulingCalendar({
                       />
                     </FormControl>
                     <FormDescription>
-                      Let us know about any accessibility needs or specific interests
+                      Let us know about any accessibility needs or specific
+                      interests
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -321,7 +335,7 @@ export function TourSchedulingCalendar({
             {/* Date Selection Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Select Date & Time</h3>
-              
+
               <FormField
                 control={form.control}
                 name="preferredDate"
@@ -358,7 +372,8 @@ export function TourSchedulingCalendar({
                       </PopoverContent>
                     </Popover>
                     <FormDescription>
-                      Tours are available Monday through Friday, up to 2 months in advance
+                      Tours are available Monday through Friday, up to 2 months
+                      in advance
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -384,19 +399,31 @@ export function TourSchedulingCalendar({
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="morning" id="tour-morning" />
-                          <label htmlFor="tour-morning" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="tour-morning"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Morning (9:00 AM - 12:00 PM)
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="afternoon" id="tour-afternoon" />
-                          <label htmlFor="tour-afternoon" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <RadioGroupItem
+                            value="afternoon"
+                            id="tour-afternoon"
+                          />
+                          <label
+                            htmlFor="tour-afternoon"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Afternoon (2:00 PM - 5:00 PM)
                           </label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="specific" id="tour-specific" />
-                          <label htmlFor="tour-specific" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="tour-specific"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             Specific Time Slot
                           </label>
                         </div>
@@ -415,7 +442,11 @@ export function TourSchedulingCalendar({
                       <Button
                         key={slot.value}
                         type="button"
-                        variant={selectedTimeSlot === slot.value ? "default" : "outline"}
+                        variant={
+                          selectedTimeSlot === slot.value
+                            ? "default"
+                            : "outline"
+                        }
                         disabled={!slot.available}
                         onClick={() => {
                           setSelectedTimeSlot(slot.value);
@@ -426,18 +457,23 @@ export function TourSchedulingCalendar({
                         <ClockIcon className="h-4 w-4" />
                         <span className="text-sm">{slot.label}</span>
                         {!slot.available && (
-                          <span className="text-xs text-muted-foreground">Unavailable</span>
+                          <span className="text-xs text-muted-foreground">
+                            Unavailable
+                          </span>
                         )}
                       </Button>
                     ))}
                   </div>
                   {watchSelectedDate && (
                     <FormDescription>
-                      Available time slots for {format(watchSelectedDate, "EEEE, MMMM d")}
+                      Available time slots for{" "}
+                      {format(watchSelectedDate, "EEEE, MMMM d")}
                     </FormDescription>
                   )}
                   {watchTimePreference === "specific" && !selectedTimeSlot && (
-                    <p className="text-sm text-destructive">Please select a time slot</p>
+                    <p className="text-sm text-destructive">
+                      Please select a time slot
+                    </p>
                   )}
                 </div>
               )}
@@ -446,7 +482,7 @@ export function TourSchedulingCalendar({
             {/* Additional Notes Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Additional Information</h3>
-              
+
               <FormField
                 control={form.control}
                 name="notes"
@@ -461,7 +497,8 @@ export function TourSchedulingCalendar({
                       />
                     </FormControl>
                     <FormDescription>
-                      Share any specific interests or questions (max 500 characters)
+                      Share any specific interests or questions (max 500
+                      characters)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -473,10 +510,16 @@ export function TourSchedulingCalendar({
             <div className="flex flex-col sm:flex-row gap-3 pt-6">
               <Button
                 type="submit"
-                disabled={isSubmitting || isLoading || (watchTimePreference === "specific" && !selectedTimeSlot)}
+                disabled={
+                  isSubmitting ||
+                  isLoading ||
+                  (watchTimePreference === "specific" && !selectedTimeSlot)
+                }
                 className="flex-1"
               >
-                {isSubmitting || isLoading ? "Booking Tour..." : "Book Campus Tour"}
+                {isSubmitting || isLoading
+                  ? "Booking Tour..."
+                  : "Book Campus Tour"}
               </Button>
               {onCancel && (
                 <Button

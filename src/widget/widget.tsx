@@ -1,7 +1,7 @@
-import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
-import { WidgetConfig, WidgetMessage, ChatMessage } from './types';
-import { StandaloneChatWidget } from './components/StandaloneChatWidget';
+import React from "react";
+import { createRoot, Root } from "react-dom/client";
+import { WidgetConfig, WidgetMessage } from "./types";
+import { StandaloneChatWidget } from "./components/StandaloneChatWidget";
 
 export class EticAIWidget {
   private config: WidgetConfig;
@@ -9,14 +9,14 @@ export class EticAIWidget {
   private shadowRoot: ShadowRoot | null = null;
   private reactRoot: Root | null = null;
   private isInitialized = false;
-  private messageHandlers: Map<string, (data: any) => void> = new Map();
+  private messageHandlers: Map<string, (data: unknown) => void> = new Map();
 
   constructor(config: WidgetConfig) {
     this.config = {
-      theme: 'light',
-      position: 'bottom-right',
-      apiEndpoint: '/api/chat',
-      allowedOrigins: ['*'],
+      theme: "light",
+      position: "bottom-right",
+      apiEndpoint: "/api/chat",
+      allowedOrigins: ["*"],
       autoOpen: false,
       showWelcomeMessage: true,
       ...config,
@@ -30,7 +30,7 @@ export class EticAIWidget {
 
   public init(): void {
     if (this.isInitialized) {
-      console.warn('EticAIWidget is already initialized');
+      console.warn("EticAIWidget is already initialized");
       return;
     }
 
@@ -42,9 +42,9 @@ export class EticAIWidget {
       this.setupMessageHandlers();
       this.isInitialized = true;
 
-      console.log('EticAIWidget initialized successfully');
+      console.log("EticAIWidget initialized successfully");
     } catch (error) {
-      console.error('Failed to initialize EticAIWidget:', error);
+      console.error("Failed to initialize EticAIWidget:", error);
     }
   }
 
@@ -65,14 +65,14 @@ export class EticAIWidget {
     }
 
     // Clean up message handlers
-    window.removeEventListener('message', this.handleMessage);
+    window.removeEventListener("message", this.handleMessage);
     this.messageHandlers.clear();
 
     this.container = null;
     this.shadowRoot = null;
     this.isInitialized = false;
 
-    console.log('EticAIWidget destroyed');
+    console.log("EticAIWidget destroyed");
   }
 
   public updateConfig(newConfig: Partial<WidgetConfig>): void {
@@ -83,8 +83,8 @@ export class EticAIWidget {
   }
 
   private createContainer(): void {
-    this.container = document.createElement('div');
-    this.container.id = 'etic-ai-widget-container';
+    this.container = document.createElement("div");
+    this.container.id = "etic-ai-widget-container";
     this.container.style.cssText = `
       position: fixed;
       z-index: 2147483647;
@@ -99,14 +99,14 @@ export class EticAIWidget {
 
   private setupShadowDOM(): void {
     if (!this.container) {
-      throw new Error('Container not created');
+      throw new Error("Container not created");
     }
 
     // Create shadow root for style isolation
-    this.shadowRoot = this.container.attachShadow({ mode: 'open' });
+    this.shadowRoot = this.container.attachShadow({ mode: "open" });
 
     // Create a div inside shadow root for React
-    const reactContainer = document.createElement('div');
+    const reactContainer = document.createElement("div");
     reactContainer.style.cssText = `
       position: relative;
       width: 100%;
@@ -121,7 +121,7 @@ export class EticAIWidget {
       return;
     }
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       /* Reset styles */
       * {
@@ -195,7 +195,7 @@ export class EticAIWidget {
       
       /* Custom widget styles */
       .widget-button {
-        background: ${this.config.primaryColor || '#2563eb'};
+        background: ${this.config.primaryColor || "#2563eb"};
         color: white;
         border: none;
         cursor: pointer;
@@ -257,7 +257,7 @@ export class EticAIWidget {
       return;
     }
 
-    const reactContainer = this.shadowRoot.querySelector('div');
+    const reactContainer = this.shadowRoot.querySelector("div");
     if (!reactContainer) {
       return;
     }
@@ -275,12 +275,15 @@ export class EticAIWidget {
   }
 
   private setupMessageHandlers(): void {
-    window.addEventListener('message', this.handleMessage);
+    window.addEventListener("message", this.handleMessage);
   }
 
   private handleMessage(event: MessageEvent<WidgetMessage>): void {
     // Validate origin if specified
-    if (this.config.allowedOrigins && !this.config.allowedOrigins.includes('*')) {
+    if (
+      this.config.allowedOrigins &&
+      !this.config.allowedOrigins.includes("*")
+    ) {
       if (!this.config.allowedOrigins.includes(event.origin)) {
         return;
       }
@@ -289,17 +292,19 @@ export class EticAIWidget {
     const { type, data } = event.data;
 
     switch (type) {
-      case 'init':
+      case "init":
         this.init();
         break;
-      case 'config':
-        this.updateConfig(data);
+      case "config":
+        if (data && typeof data === "object") {
+          this.updateConfig(data as Partial<WidgetConfig>);
+        }
         break;
-      case 'open':
-        this.sendMessage('widget-opened', {});
+      case "open":
+        this.sendMessage("widget-opened", {});
         break;
-      case 'close':
-        this.sendMessage('widget-closed', {});
+      case "close":
+        this.sendMessage("widget-closed", {});
         break;
       default:
         // Handle custom message types
@@ -310,20 +315,20 @@ export class EticAIWidget {
     }
   }
 
-  private sendMessage(type: string, data: any): void {
+  private sendMessage(type: string, data: unknown): void {
     if (window.parent !== window) {
-      window.parent.postMessage({ type, data, source: 'etic-ai-widget' }, '*');
+      window.parent.postMessage({ type, data, source: "etic-ai-widget" }, "*");
     }
 
     // Also dispatch custom event for same-origin communication
     window.dispatchEvent(
-      new CustomEvent('etic-ai-widget-message', {
+      new CustomEvent("etic-ai-widget-message", {
         detail: { type, data },
       })
     );
   }
 
-  public on(eventType: string, handler: (data: any) => void): void {
+  public on(eventType: string, handler: (data: unknown) => void): void {
     this.messageHandlers.set(eventType, handler);
   }
 
