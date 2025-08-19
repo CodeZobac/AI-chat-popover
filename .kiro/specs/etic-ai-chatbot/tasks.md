@@ -59,7 +59,7 @@
     - Create smooth open/close animations with Framer Motion
     - _Requirements: 2.1, 2.2, 8.1, 8.2_
 
-- [-] 5. Chat Interface Implementation
+- [x] 5. Chat Interface Implementation
 
   - [x] 5.1 Build main chat popover interface
 
@@ -69,7 +69,7 @@
     - Add proper accessibility attributes and keyboard navigation
     - _Requirements: 2.3, 2.4, 8.1, 8.2, 8.3, 8.4_
 
-  - [ ] 5.2 Configure AI integration with Vercel AI SDK
+  - [x] 5.2 Configure AI integration with Vercel AI SDK
 
     - Set up API route for chat endpoint (/api/chat)
     - Integrate Google Gemini 2.5 Flash API with streaming responses
@@ -77,9 +77,9 @@
     - Create system prompt with ETIC Algarve information and guidelines
     - _Requirements: 3.1, 3.2, 3.3, 4.1, 4.2, 4.3_
 
-- [ ] 6. Scheduling System Implementation
+- [x] 6. Scheduling System Implementation
 
-  - [ ] 6.1 Create interview scheduling form
+  - [x] 6.1 Create interview scheduling form
 
     - Build form using ShadCN Form components with React Hook Form
     - Add Input, Select, and Textarea components for user information
@@ -87,7 +87,7 @@
     - Create form submission handler with loading states
     - _Requirements: 5.1, 5.2, 5.5, 6.1, 6.2, 6.3_
 
-  - [ ] 6.2 Implement tour scheduling calendar
+  - [x] 6.2 Implement tour scheduling calendar
 
     - Integrate ShadCN Calendar component with date-fns
     - Create time slot selection interface
@@ -95,16 +95,17 @@
     - Implement availability checking and booking logic
     - _Requirements: 5.1, 5.3, 5.5, 6.1, 6.2, 6.3_
 
-  - [ ] 6.3 Build call scheduling interface
+  - [x] 6.3 Build call scheduling interface
+
     - Create date picker for preferred call dates
     - Implement time preference selection with RadioGroup
     - Add contact information collection form
     - Handle timezone considerations for international students
     - _Requirements: 5.1, 5.4, 5.5, 6.1, 6.2, 6.3_
 
-- [ ] 7. Chat Action Buttons and Scheduling Integration
+- [x] 7. Chat Action Buttons and Scheduling Integration
 
-  - [ ] 7.1 Implement three-button action system
+  - [x] 7.1 Implement three-button action system
 
     - Create action buttons that appear at the end of AI responses
     - Build "Schedule Interview" button that triggers interview form
@@ -112,7 +113,8 @@
     - Build "Schedule Call" button that triggers call scheduler
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 7.2 Connect scheduling forms to database
+  - [x] 7.2 Connect scheduling forms to database
+
     - Implement API routes for each scheduling type
     - Create database insertion logic for scheduling requests
     - Add confirmation messages and reference number generation
@@ -121,7 +123,7 @@
 
 - [ ] 8. Embeddable Widget Development
 
-  - [ ] 8.1 Create standalone widget bundle
+  - [x] 8.1 Create standalone widget bundle
 
     - Configure Webpack for standalone JavaScript bundle
     - Implement Shadow DOM encapsulation for style isolation
@@ -129,14 +131,18 @@
     - Set up PostMessage API for cross-origin communication
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
-  - [ ] 8.2 Implement widget integration API
+  - [x] 8.2 Implement widget integration API
+
+
+
     - Create simple JavaScript snippet for easy integration
     - Add configuration options for theme, position, and branding
     - Implement origin validation for security
     - Create fallback iframe solution for maximum compatibility
     - _Requirements: 9.1, 9.3, 9.4, 9.5, 9.6_
 
-- [ ] 9. Testing and Quality Assurance
+- [x] 9. Testing and Quality Assurance
+
 
   - [ ] 9.1 Implement unit tests for components
 
@@ -146,14 +152,18 @@
     - Test AI integration and message handling
     - _Requirements: All requirements - testing coverage_
 
+
+
   - [ ] 9.2 Add integration tests for user flows
     - Test complete conversation flow from widget open to scheduling
+
     - Verify scheduling form submissions and database storage
     - Test embeddable widget functionality across different domains
     - Validate responsive design across device sizes
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6_
 
-- [ ] 10. Performance Optimization and Deployment
+- [x] 10. Performance Optimization and Deployment
+
 
   - [ ] 10.1 Optimize application performance
 
