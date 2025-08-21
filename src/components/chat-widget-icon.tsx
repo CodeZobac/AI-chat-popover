@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -190,7 +190,7 @@ export function useChatWidget() {
     unreadCount: 0,
   });
 
-  const toggleWidget = () => {
+  const toggleWidget = useCallback(() => {
     setState((prev) => ({
       ...prev,
       isOpen: !prev.isOpen,
@@ -198,23 +198,23 @@ export function useChatWidget() {
       hasNewMessages: prev.isOpen ? prev.hasNewMessages : false,
       unreadCount: prev.isOpen ? prev.unreadCount : 0,
     }));
-  };
+  }, []);
 
-  const addNotification = () => {
+  const addNotification = useCallback(() => {
     setState((prev) => ({
       ...prev,
       hasNewMessages: true,
       unreadCount: prev.unreadCount + 1,
     }));
-  };
+  }, []);
 
-  const clearNotifications = () => {
+  const clearNotifications = useCallback(() => {
     setState((prev) => ({
       ...prev,
       hasNewMessages: false,
       unreadCount: 0,
     }));
-  };
+  }, []);
 
   return {
     ...state,

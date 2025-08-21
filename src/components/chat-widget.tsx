@@ -12,7 +12,6 @@ import { CHAT_CONFIG } from "@/lib/chat-config";
 import { saveChatToStorage, loadChatFromStorage } from "@/lib/chat-utils";
 import type { ChatWidgetProps } from "@/types/chat";
 
-
 interface ChatWidgetComponentProps extends ChatWidgetProps {
   sessionId?: string;
   apiEndpoint?: string;
@@ -37,7 +36,7 @@ export function ChatWidget({
     content: string;
     createdAt: Date;
   }
-  
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +71,21 @@ export function ChatWidget({
     setError(null);
 
     try {
+      // Prepare the messages for the API, filtering out any previous error messages and empty messages
+      const messagesToSend = [...messages, userMessage]
+        .filter(
+          (msg) =>
+            msg.content.trim() !== "" &&
+            msg.content !==
+              "I'm sorry, I'm experiencing some technical difficulties. Please try again in a moment."
+        )
+        .map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        }));
+
+      console.log("Sending messages to API:", messagesToSend);
+
       // Call the chat API
       const response = await fetch(apiEndpoint, {
         method: "POST",
@@ -79,10 +93,7 @@ export function ChatWidget({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
+          messages: messagesToSend,
         }),
       });
 
@@ -116,27 +127,16 @@ export function ChatWidget({
 
         if (value) {
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
-          
-          for (const line of lines) {
-            if (line.startsWith('0:')) {
-              try {
-                const content = line.slice(2);
-                assistantMessage.content += content;
-                
-                // Update the assistant message
-                setMessages((prev) => 
-                  prev.map((msg) => 
-                    msg.id === assistantMessage.id 
-                      ? { ...msg, content: assistantMessage.content }
-                      : msg
-                  )
-                );
-              } catch (parseError) {
-                console.error("Error parsing stream chunk:", parseError);
-              }
-            }
-          }
+          assistantMessage.content += chunk;
+
+          // Update the assistant message
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessage.id
+                ? { ...msg, content: assistantMessage.content }
+                : msg
+            )
+          );
         }
       }
 
@@ -147,12 +147,13 @@ export function ChatWidget({
     } catch (err) {
       console.error("Chat error:", err);
       setError(err as Error);
-      
+
       // Add error message
       const errorMessage: ChatMessage = {
         id: (Date.now() + 2).toString(),
         role: "assistant" as const,
-        content: "I'm sorry, I'm experiencing some technical difficulties. Please try again in a moment.",
+        content:
+          "I'm sorry, I'm experiencing some technical difficulties. Please try again in a moment.",
         createdAt: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -177,7 +178,7 @@ export function ChatWidget({
           id: msg.id,
           role: msg.role as "user" | "assistant",
           content: msg.content,
-          createdAt: msg.createdAt || new Date(),
+          createdAt: new Date(msg.createdAt || Date.now()),
         }));
         setMessages(convertedMessages);
       }
@@ -207,7 +208,7 @@ export function ChatWidget({
     if (widgetState.isOpen) {
       widgetState.clearNotifications();
     }
-  }, [widgetState.isOpen, widgetState]);
+  }, [widgetState.isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle keyboard navigation (Escape to close)
   useEffect(() => {
@@ -222,12 +223,6 @@ export function ChatWidget({
       return () => document.removeEventListener("keydown", handleKeyDown);
     }
   }, [widgetState.isOpen, widgetState]);
-
-  // Position classes for the popover
-  const popoverPositionClasses = {
-    "bottom-right": "bottom-24 right-6",
-    "bottom-left": "bottom-24 left-6",
-  };
 
   return (
     <>
@@ -250,19 +245,17 @@ export function ChatWidget({
             ref={chatContainerRef}
             className={cn(
               "fixed z-[9998] flex flex-col",
-              // Desktop sizing
-              "w-[400px] h-[600px]",
+              // Desktop sizing with better constraints
+              "w-[400px] h-[600px] max-h-[calc(100vh-6rem)]",
               // Mobile sizing - full screen on small devices
               "md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-8rem)]",
               "max-md:inset-4 max-md:w-auto max-md:h-auto",
               "bg-background border border-border rounded-lg shadow-2xl",
               "overflow-hidden",
-              // Position only applies on desktop
-              "md:" +
-                popoverPositionClasses[position].replace(
-                  "bottom-24 ",
-                  "bottom-24 "
-                ),
+              // Position widget above the icon - icon is at bottom-6, transform to place widget above
+              position === "bottom-right"
+                ? "md:bottom-6 md:right-6 md:transform md:translate-y-[-100%] md:-translate-y-4"
+                : "md:bottom-6 md:left-6 md:transform md:translate-y-[-100%] md:-translate-y-4",
               // Center on mobile
               "max-md:top-4 max-md:left-4 max-md:right-4 max-md:bottom-4"
             )}
@@ -322,11 +315,12 @@ export function ChatWidget({
               {error && (
                 <div className="p-4 bg-destructive/10 border-b border-destructive/20">
                   <p className="text-sm text-destructive">
-                    I&apos;m experiencing some technical difficulties. Please try again in a moment.
+                    I&apos;m experiencing some technical difficulties. Please
+                    try again in a moment.
                   </p>
                 </div>
               )}
-              
+
               <Chat
                 messages={messages}
                 input={input}
@@ -335,7 +329,9 @@ export function ChatWidget({
                 isGenerating={isLoading}
                 stop={stop}
                 append={append}
-                suggestions={messages.length === 0 ? [...CHAT_CONFIG.suggestions] : []}
+                suggestions={
+                  messages.length === 0 ? [...CHAT_CONFIG.suggestions] : []
+                }
                 className="flex-1 border-0"
                 setMessages={setMessages}
               />
