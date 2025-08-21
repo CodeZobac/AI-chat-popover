@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { streamText, convertToCoreMessages } from "ai";
+import { streamText } from "ai";
 import { NextRequest } from "next/server";
 
 // ETIC Algarve system prompt with comprehensive information
@@ -64,7 +64,25 @@ Remember: Your goal is to help prospective students find the right educational p
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    console.log("Request body:", body);
+
+    const { messages } = body;
+    console.log("Messages:", messages);
+
+    // Validate messages
+    if (!messages || !Array.isArray(messages)) {
+      console.error("Invalid messages format:", messages);
+      return new Response(
+        JSON.stringify({
+          error: "Invalid messages format. Expected an array of messages.",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
     // Check if Google API key is configured
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -83,14 +101,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert messages to the format expected by the AI SDK
-    const coreMessages = convertToCoreMessages(messages);
+    // The messages are already in the correct format, so no conversion is needed.
+    // const coreMessages = convertToCoreMessages(messages);
 
     // Create the streaming response
     const result = await streamText({
       model: google("gemini-2.0-flash-exp"),
       system: ETIC_SYSTEM_PROMPT,
-      messages: coreMessages,
+      messages: messages,
     });
 
     return result.toTextStreamResponse();
