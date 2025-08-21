@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Sparkles, Users, Calendar } from "lucide-react";
 import { motion, Variants } from "framer-motion";
 import { useEffect, useState } from "react";
+import { ChatWidget, useChatWidget } from "@/components/chat-widget";
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
+  const chatWidget = useChatWidget();
 
   useEffect(() => {
     setIsVisible(true);
@@ -176,8 +178,7 @@ export default function Home() {
                     size="lg"
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                     onClick={() => {
-                      // This will be connected to the chatbot widget in later tasks
-                      console.log("Chatbot widget will open here");
+                      chatWidget.toggleWidget();
                     }}
                   >
                     <motion.div
@@ -266,6 +267,13 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </main>
+
+      {/* Chat Widget */}
+      <ChatWidget
+        position="bottom-right"
+        theme="light"
+        sessionId="landing-page-session"
+      />
     </div>
   );
 }
